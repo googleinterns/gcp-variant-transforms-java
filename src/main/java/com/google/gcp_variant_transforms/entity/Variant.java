@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class Variant implements Serializable {
   private static final long serialVersionUID = 260660913763642347L;
 
-  private final String contig;
+    private final String contig;
     private final int start;
     private final int end;
 

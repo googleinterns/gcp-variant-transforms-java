@@ -1,10 +1,10 @@
+// Copyright 2020 Google LLC
+
 package com.google.gcp_variant_transforms.options;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.task.VcfToBqTask;
 import com.google.inject.Inject;
-// Copyright 2020 Google LLC
-
 import com.google.inject.Singleton;
 import org.apache.beam.sdk.options.PipelineOptions;
 import java.io.IOException;

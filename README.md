@@ -14,7 +14,7 @@ Set the flags for your project, and run the gradle command.
 
 Sample Command:
 ```
-GOOGLE_CLOUD_PROJECT=tural-test-runner.
+GOOGLE_CLOUD_PROJECT=tural-test-runner
 RUNNER=DirectRunner
 INPUT_FILE=gs://gcp-variant-transforms-testfiles/small_tests/valid-4.0.vcf
 JOB_NAME=java-test-run
@@ -23,7 +23,7 @@ TEMP_LOCATION=gs://${GOOGLE_CLOUD_PROJECT}/javawork/temp
 OUTPUT=../output/report
 
 ./gradlew vcfToBq -Prargs=" \
-  --project ${GOOGLE_CLOUD_PROJECT} \
+  --project=${GOOGLE_CLOUD_PROJECT} \
   --runner=${RUNNER} \
   --jobName=${JOB_NAME} \
   --region=${GOOGLE_CLOUD_REGION} \

@@ -16,9 +16,6 @@ import java.io.IOException;
  */
 public class VcfToBqTask implements Task {
 
-  static String INPUT_PATH = "../test.vcf";
-  static String OUTPUT_PATH = "../output/result";
-
   private final HeaderReader headerReader;
   private final PipelineRunner pipelineRunner;
   private final VcfToBqContext context;
