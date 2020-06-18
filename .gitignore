@@ -6,3 +6,7 @@ build
 bin
 .settings/
 gradlew.bat
+
+# Ignore IntelliJ project files
+.idea
+gcp-variant-transforms-java.iml
