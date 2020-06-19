@@ -53,3 +53,12 @@ task vcfToBq(type:JavaExec) {
 application {
   mainClassName = 'com.google.gcp_variant_transforms.task.Main'
 }
+
+test {
+
+  // Print test results
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
+
+}

@@ -13,7 +13,7 @@ public class HeaderIteratorTest {
 
   @Test
   public void testHeaderLinesHasNext_whenCheckingBoolean_thenTrue() {
-    //arrange
+    // Arrange
     int listSize = 5;
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
     ImmutableList<String> headerLines;
@@ -22,9 +22,9 @@ public class HeaderIteratorTest {
     }
     headerLines = headerLinesBuilder.build();
     HeaderIterator headerIterator = new HeaderIterator(headerLines);
-    //act
+    // Act
 
-    //assert
+    // Assert
     assertThat(headerIterator.hasNext()).isTrue();
 
   }
