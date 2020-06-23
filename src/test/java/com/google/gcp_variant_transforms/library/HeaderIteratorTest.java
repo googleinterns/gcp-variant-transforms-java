@@ -1,3 +1,5 @@
+// Copyright 2020 Google LLC
+
 package com.google.gcp_variant_transforms.library;
 
 import com.google.gcp_variant_transforms.library.HeaderIterator;
@@ -28,7 +30,6 @@ public class HeaderIteratorTest {
 
     // Assert
     assertThat(headerIterator.hasNext()).isTrue();
-
   }
 
   @Test
@@ -84,7 +85,6 @@ public class HeaderIteratorTest {
 
     // Assert
     assertThat(headerIterator.next()).contains(expectedHeaderLine);
-
   }
 
   @Test
@@ -103,6 +103,43 @@ public class HeaderIteratorTest {
         headerIterator.next());
     // Assert
     assertThat(actualException).isInstanceOf(expectedException);
+  }
 
+  @Test
+  public void testHeaderLinesPeek_whenCheckingString_thenContains() {
+    // Arrange
+    int listSize = 5;
+    CharSequence expectedHeaderLine; 
+    ImmutableList<String> headerLines;
+    HeaderIterator headerIterator;
+    ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
+    for (int i = 0; i < listSize; i++) {
+      headerLinesBuilder.add("##sampleHeaderLine=" + i);
+    }
+    headerLines = headerLinesBuilder.build();
+    headerIterator = new HeaderIterator(headerLines);
+    expectedHeaderLine = "##sampleHeaderLine=0";
+    // Act
+
+    // Assert
+    assertThat(headerIterator.peek()).contains(expectedHeaderLine);
+  }
+
+  @Test
+  public void testHeaderLinesPeek_whenCheckingString_thenException() {
+    // Arrange
+    int listSize = 5;
+    HeaderIterator headerIterator;
+    ImmutableList<String> headerLines;
+    Exception actualException;
+    Class expectedException = IndexOutOfBoundsException.class;
+    ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
+    headerLines = headerLinesBuilder.build(); // empty headerList
+    headerIterator = new HeaderIterator(headerLines);
+    // Act
+    actualException = assertThrows(IndexOutOfBoundsException.class, () ->
+        headerIterator.peek());
+    // Assert
+    assertThat(actualException).isInstanceOf(expectedException);
   }
 }
