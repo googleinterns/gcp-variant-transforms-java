@@ -26,6 +26,7 @@ public class HeaderIteratorTest {
     }
     headerLines = headerLinesBuilder.build();
     headerIterator = new HeaderIterator(headerLines);
+
     // Act
 
     // Assert
@@ -44,10 +45,12 @@ public class HeaderIteratorTest {
     }
     headerLines = headerLinesBuilder.build();
     headerIterator = new HeaderIterator(headerLines);
+
     // Act
     for (int i = 0; i < listSize; i++) {
       headerIterator.next();
     }
+
     // Assert
     assertThat(headerIterator.hasNext()).isFalse();
   }
@@ -60,6 +63,7 @@ public class HeaderIteratorTest {
     HeaderIterator headerIterator;
     headerLines = headerLinesBuilder.build(); // empty headerList
     headerIterator = new HeaderIterator(headerLines);
+
     // Act
 
     // Assert
@@ -80,6 +84,7 @@ public class HeaderIteratorTest {
     headerLines = headerLinesBuilder.build();
     headerIterator = new HeaderIterator(headerLines);
     expectedHeaderLine = "##sampleHeaderLine=0";
+
     // Act
 
     // Assert
@@ -97,9 +102,11 @@ public class HeaderIteratorTest {
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
     headerLines = headerLinesBuilder.build(); // empty headerList
     headerIterator = new HeaderIterator(headerLines);
+
     // Act
     actualException = assertThrows(IndexOutOfBoundsException.class, () ->
         headerIterator.next());
+
     // Assert
     assertThat(actualException).isInstanceOf(expectedException);
   }
@@ -135,9 +142,11 @@ public class HeaderIteratorTest {
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
     headerLines = headerLinesBuilder.build(); // empty headerList
     headerIterator = new HeaderIterator(headerLines);
+
     // Act
     actualException = assertThrows(IndexOutOfBoundsException.class, () ->
         headerIterator.peek());
+        
     // Assert
     assertThat(actualException).isInstanceOf(expectedException);
   }
