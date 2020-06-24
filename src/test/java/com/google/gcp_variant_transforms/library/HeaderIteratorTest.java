@@ -55,7 +55,6 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesHasNext_whenEmptyCheckingBoolean_thenFalse() {
     // Arrange
-    int listSize = 5;
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
     ImmutableList<String> headerLines; 
     HeaderIterator headerIterator;
