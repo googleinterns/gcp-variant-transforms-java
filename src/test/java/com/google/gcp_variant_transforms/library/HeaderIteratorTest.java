@@ -2,12 +2,12 @@
 
 package com.google.gcp_variant_transforms.library;
 
-import com.google.gcp_variant_transforms.library.HeaderIterator;
 import static com.google.common.truth.Truth.*;
-import com.google.common.collect.ImmutableList;
-import org.junit.Test;
-import org.junit.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import com.google.common.collect.ImmutableList;
+import com.google.gcp_variant_transforms.library.HeaderIterator;
+import org.junit.*;
 
 /**
  * Units tests for HeaderIterator.java
