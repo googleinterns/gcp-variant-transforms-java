@@ -19,13 +19,11 @@ public class HeaderIteratorTest {
     // Arrange
     int listSize = 5;
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
-    ImmutableList<String> headerLines;
     HeaderIterator headerIterator;
     for (int i = 0; i < listSize; i++) {
       headerLinesBuilder.add("##sampleHeaderLine=" + i);
     }
-    headerLines = headerLinesBuilder.build();
-    headerIterator = new HeaderIterator(headerLines);
+    headerIterator = new HeaderIterator(headerLinesBuilder.build());
 
     // Act
 
@@ -38,13 +36,11 @@ public class HeaderIteratorTest {
     // Arrange
     int listSize = 5;
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
-    ImmutableList<String> headerLines;
     HeaderIterator headerIterator;
     for (int i = 0; i < listSize; i++) {
       headerLinesBuilder.add("##sampleHeaderLine=" + i);
     }
-    headerLines = headerLinesBuilder.build();
-    headerIterator = new HeaderIterator(headerLines);
+    headerIterator = new HeaderIterator(headerLinesBuilder.build());
 
     // Act
     for (int i = 0; i < listSize; i++) {
@@ -59,10 +55,8 @@ public class HeaderIteratorTest {
   public void testHeaderLinesHasNext_whenEmptyCheckingBoolean_thenFalse() {
     // Arrange
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
-    ImmutableList<String> headerLines; 
     HeaderIterator headerIterator;
-    headerLines = headerLinesBuilder.build(); // empty headerList
-    headerIterator = new HeaderIterator(headerLines);
+    headerIterator = new HeaderIterator(headerLinesBuilder.build());
 
     // Act
 
@@ -75,14 +69,12 @@ public class HeaderIteratorTest {
     // Arrange
     int listSize = 5;
     CharSequence expectedHeaderLine; 
-    ImmutableList<String> headerLines;
     HeaderIterator headerIterator;
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
     for (int i = 0; i < listSize; i++) {
       headerLinesBuilder.add("##sampleHeaderLine=" + i);
     }
-    headerLines = headerLinesBuilder.build();
-    headerIterator = new HeaderIterator(headerLines);
+    headerIterator = new HeaderIterator(headerLinesBuilder.build());
     expectedHeaderLine = "##sampleHeaderLine=0";
 
     // Act
@@ -94,14 +86,11 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesNext_whenCheckingString_thenException() {
     // Arrange
-    int listSize = 5;
     HeaderIterator headerIterator;
-    ImmutableList<String> headerLines;
     Exception actualException;
     Class expectedException = IndexOutOfBoundsException.class;
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
-    headerLines = headerLinesBuilder.build(); // empty headerList
-    headerIterator = new HeaderIterator(headerLines);
+    headerIterator = new HeaderIterator(headerLinesBuilder.build()); // empty headerList
 
     // Act
     actualException = assertThrows(IndexOutOfBoundsException.class, () ->
@@ -116,14 +105,12 @@ public class HeaderIteratorTest {
     // Arrange
     int listSize = 5;
     CharSequence expectedHeaderLine; 
-    ImmutableList<String> headerLines;
     HeaderIterator headerIterator;
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
     for (int i = 0; i < listSize; i++) {
       headerLinesBuilder.add("##sampleHeaderLine=" + i);
     }
-    headerLines = headerLinesBuilder.build();
-    headerIterator = new HeaderIterator(headerLines);
+    headerIterator = new HeaderIterator(headerLinesBuilder.build());
     expectedHeaderLine = "##sampleHeaderLine=0";
     // Act
 
@@ -134,19 +121,16 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesPeek_whenCheckingString_thenException() {
     // Arrange
-    int listSize = 5;
     HeaderIterator headerIterator;
-    ImmutableList<String> headerLines;
     Exception actualException;
     Class expectedException = IndexOutOfBoundsException.class;
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<String>();
-    headerLines = headerLinesBuilder.build(); // empty headerList
-    headerIterator = new HeaderIterator(headerLines);
+    headerIterator = new HeaderIterator(headerLinesBuilder.build()); // empty headerList
 
     // Act
     actualException = assertThrows(IndexOutOfBoundsException.class, () ->
         headerIterator.peek());
-        
+
     // Assert
     assertThat(actualException).isInstanceOf(expectedException);
   }
