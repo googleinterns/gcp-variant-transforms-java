@@ -66,28 +66,29 @@ public class HeaderIteratorTest {
   public void testHeaderLinesNext_whenCheckingString_thenContains() {
     // Arrange
     int numHeaderLines = 5;
-    CharSequence expectedHeaderLine = "##sampleHeaderLine=0"; 
+    CharSequence expectedHeaderLine1 = "##sampleHeaderLine=0";
+    CharSequence expectedHeaderLine2 = "##sampleHeaderLine=1"; 
     HeaderIterator headerIterator = createHeaderIterator(numHeaderLines);
 
     // Act
 
     // Assert
-    assertThat(headerIterator.next()).contains(expectedHeaderLine);
+    assertThat(headerIterator.next()).contains(expectedHeaderLine1);
+    // next should move the pointer
+    assertThat(headerIterator.next()).contains(expectedHeaderLine2);
   }
 
   @Test
   public void testHeaderLinesNext_whenCheckingString_thenException() {
     // Arrange
     HeaderIterator headerIterator = new HeaderIterator(ImmutableList.of()); // empty header
-    Exception actualException;
     Class expectedException = IndexOutOfBoundsException.class;
 
     // Act
-    actualException = assertThrows(IndexOutOfBoundsException.class, () ->
-        headerIterator.next());
 
     // Assert
-    assertThat(actualException).isInstanceOf(expectedException);
+    assertThrows(expectedException, () ->
+        headerIterator.next());
   }
 
   @Test
@@ -101,20 +102,21 @@ public class HeaderIteratorTest {
 
     // Assert
     assertThat(headerIterator.peek()).contains(expectedHeaderLine);
+    // peek shouldn't move the pointer
+    assertThat(headerIterator.peek()).contains(expectedHeaderLine); 
+
   }
 
   @Test
   public void testHeaderLinesPeek_whenCheckingString_thenException() {
     // Arrange
     HeaderIterator headerIterator = new HeaderIterator(ImmutableList.of()); // empty header
-    Exception actualException;
     Class expectedException = IndexOutOfBoundsException.class;
 
     // Act
-    actualException = assertThrows(IndexOutOfBoundsException.class, () ->
-        headerIterator.peek());
 
     // Assert
-    assertThat(actualException).isInstanceOf(expectedException);
+    assertThrows(expectedException, () -> 
+        headerIterator.peek());
   }
 }
