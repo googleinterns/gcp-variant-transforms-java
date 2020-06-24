@@ -54,8 +54,7 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesHasNext_whenEmptyCheckingBoolean_thenFalse() {
     // Arrange
-    int numHeaderLines = 0;
-    HeaderIterator headerIterator = createHeaderIterator(numHeaderLines);
+    HeaderIterator headerIterator = new HeaderIterator(ImmutableList.of()); // empty header
 
     // Act
 
@@ -79,8 +78,7 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesNext_whenCheckingString_thenException() {
     // Arrange
-    int numHeaderLines = 0;
-    HeaderIterator headerIterator = createHeaderIterator(numHeaderLines);
+    HeaderIterator headerIterator = new HeaderIterator(ImmutableList.of()); // empty header
     Exception actualException;
     Class expectedException = IndexOutOfBoundsException.class;
 
@@ -108,8 +106,7 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesPeek_whenCheckingString_thenException() {
     // Arrange
-    int numHeaderLines = 0;
-    HeaderIterator headerIterator = createHeaderIterator(numHeaderLines);
+    HeaderIterator headerIterator = new HeaderIterator(ImmutableList.of()); // empty header
     Exception actualException;
     Class expectedException = IndexOutOfBoundsException.class;
 
