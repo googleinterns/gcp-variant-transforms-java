@@ -65,9 +65,8 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesNext_whenCheckingString_thenException() {
     HeaderIterator headerIterator = new HeaderIterator(ImmutableList.of()); // empty header
-    Class expectedException = IndexOutOfBoundsException.class;
 
-    assertThrows(expectedException, () ->
+    assertThrows(IndexOutOfBoundsException.class, () ->
         headerIterator.next());
   }
 
@@ -86,9 +85,8 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesPeek_whenCheckingString_thenException() {
     HeaderIterator headerIterator = new HeaderIterator(ImmutableList.of()); // empty header
-    Class expectedException = IndexOutOfBoundsException.class;
 
-    assertThrows(expectedException, () -> 
+    assertThrows(IndexOutOfBoundsException.class, () -> 
         headerIterator.peek());
   }
 }
