@@ -56,7 +56,7 @@ application {
 
 test {
   // Print test results
-	testLogging {
-		events "passed", "skipped", "failed"
-	}
+  testLogging {
+    events "passed", "skipped", "failed"
+  }
 }
