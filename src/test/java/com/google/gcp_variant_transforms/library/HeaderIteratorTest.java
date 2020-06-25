@@ -53,13 +53,13 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesNext_whenCheckingString_thenContains() {
     int numHeaderLines = 5;
-    CharSequence expectedHeaderLine1 = "##sampleHeaderLine=0";
-    CharSequence expectedHeaderLine2 = "##sampleHeaderLine=1"; 
+    String expectedHeaderLine1 = "##sampleHeaderLine=0";
+    String expectedHeaderLine2 = "##sampleHeaderLine=1"; 
     HeaderIterator headerIterator = createHeaderIterator(numHeaderLines);
 
-    assertThat(headerIterator.next()).contains(expectedHeaderLine1);
+    assertThat(headerIterator.next()).matches(expectedHeaderLine1);
     // next should move the pointer
-    assertThat(headerIterator.next()).contains(expectedHeaderLine2);
+    assertThat(headerIterator.next()).matches(expectedHeaderLine2);
   }
 
   @Test
@@ -73,12 +73,12 @@ public class HeaderIteratorTest {
   @Test
   public void testHeaderLinesPeek_whenCheckingString_thenContains() {
     int numHeaderLines = 5;
-    CharSequence expectedHeaderLine = "##sampleHeaderLine=0"; 
+    String expectedHeaderLine = "##sampleHeaderLine=0"; 
     HeaderIterator headerIterator = createHeaderIterator(numHeaderLines);
 
-    assertThat(headerIterator.peek()).contains(expectedHeaderLine);
+    assertThat(headerIterator.peek()).matches(expectedHeaderLine);
     // peek shouldn't move the pointer
-    assertThat(headerIterator.peek()).contains(expectedHeaderLine); 
+    assertThat(headerIterator.peek()).matches(expectedHeaderLine); 
 
   }
 
