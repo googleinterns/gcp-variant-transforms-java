@@ -2,21 +2,22 @@
 
 package com.google.gcp_variant_transforms.entity;
 
-import htsjdk.variant.variantcontext.VariantContext;
-import static com.google.common.truth.Truth.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import org.junit.Before;
+import htsjdk.variant.variantcontext.VariantContext;
 import org.junit.Test;
 
+/**
+ * Unit tests for Variant.java
+ */
 public class VariantTest {
-
 
   @Test
   public void testGetContig_whenComparingString_thenTrue() {
     String contig = "one";
     Variant testVariant = new Variant(contig, 1, 5);
+
     assertEquals(testVariant.getContig(), contig);
   }
 
@@ -24,6 +25,7 @@ public class VariantTest {
   public void testGetStart_whenComparingString_thenTrue() {
     int start = 14370;
     Variant testVariant = new Variant("one", start, 14374);
+
     assertEquals(testVariant.getStart(), start);
   }
 
@@ -31,12 +33,14 @@ public class VariantTest {
   public void testGetEnd_whenComparingString_thenTrue() {
     int end = 14375;
     Variant testVariant = new Variant("one", 14371, end);
+
     assertEquals(testVariant.getEnd(), end);
   }
 
   @Test
   public void testVariantConstructor_whenCompareFields_thenTrue() {
     VariantContext mockVariantContext = mock(VariantContext.class);
+
     assertTrue(mockVariantContext instanceof VariantContext);
 
     // mock VariantContext fields
@@ -53,5 +57,4 @@ public class VariantTest {
                testVariant.getStart() == start &&
                testVariant.getEnd() == end);
   }
-
 }
