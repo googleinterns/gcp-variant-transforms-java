@@ -37,7 +37,10 @@ dependencies {
   compile group: 'org.apache.beam', name: 'beam-runners-google-cloud-dataflow-java', version: "${beamVersion}"
 
   // Test dependencies
+  testImplementation 'com.google.truth:truth:1.0.1'
   testImplementation 'junit:junit:4.12'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+  testImplementation 'org.mockito:mockito-core:3.3.3'
 }
 
 task vcfToBq(type:JavaExec) {
@@ -50,4 +53,10 @@ task vcfToBq(type:JavaExec) {
 
 application {
   mainClassName = 'com.google.gcp_variant_transforms.task.Main'
+}
+
+test {
+  testLogging {
+    events 'passed', 'skipped', 'failed'
+  }
 }
