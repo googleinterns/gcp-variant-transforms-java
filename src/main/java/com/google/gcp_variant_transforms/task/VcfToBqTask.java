@@ -38,14 +38,14 @@ public class VcfToBqTask implements Task {
 
   @Override
   public void run() throws IOException {
-    set_pipeline_options(this.options);
+    setPipelineOptions(this.options);
     context.setHeaderLines(headerReader.getHeaderLines());
     pipelineRunner.runPipeline();
   }
 
   /** configures filesystem to the corresponding options, regardless of task. */
-  /** @VisibleForTests */
-  protected void set_pipeline_options(PipelineOptions options) {
+  @VisibleForTesting
+  protected void setPipelineOptions(PipelineOptions options) {
     FileSystems.setDefaultPipelineOptions(options);
   }
 

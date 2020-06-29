@@ -120,9 +120,9 @@ public class VcfToBqContextTest {
 
   @Test
   public void testVcfContext_whenGetHeaderLines_thenNull() throws IOException {
-    String inputFile = "sampleInputFile.txt";
-    String output = "sampleOutputFile.txt";
-    VcfToBqOptions mockedVcfToBqOptions = create_mockedVcfToBqOptions(inputFile, output);
+    VcfToBqOptions mockedVcfToBqOptions = create_mockedVcfToBqOptions(
+        "sampleInputFile.txt", 
+        "sampleOutputFile.txt");
     VcfToBqContext vcfToBqContext = new VcfToBqContext(mockedVcfToBqOptions);    
 
     assertThat(vcfToBqContext.getHeaderLines()).isNull();
