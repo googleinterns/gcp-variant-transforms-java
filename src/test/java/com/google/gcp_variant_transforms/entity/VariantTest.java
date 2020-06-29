@@ -2,8 +2,9 @@
 
 package com.google.gcp_variant_transforms.entity;
 
-import static com.google.common.truth.Truth.*;
-import static org.mockito.Mockito.*;
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import htsjdk.variant.variantcontext.VariantContext;
 import org.junit.Test;
