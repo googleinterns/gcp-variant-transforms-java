@@ -4,28 +4,26 @@ package com.google.gcp_variant_transforms.library;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.ImmutableList;
 import htsjdk.tribble.TribbleException;
 import htsjdk.variant.vcf.VCFCodec;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Units tests for VcfParserImpl.java
  */
+@RunWith(MockitoJUnitRunner.class)
 public class VcfParserImplTest {
 
   @InjectMocks
-  private VcfParserImpl vcfParserImpl = new VcfParserImpl();
+  VcfParserImpl vcfParserImpl;
 
-//  @Mock
-//  private
-
-  private ImmutableList<String> headerLines;
+  ImmutableList<String> headerLines;
 
   @Before
   public void buildHeaderLines() {
@@ -36,13 +34,14 @@ public class VcfParserImplTest {
   }
 
   @Test
-  public void testGenerateCodecFromHeaderLines_whenCompareVCFCode_thenTrue() {
+  public void testGenerateCodecFromHeaderLines_whenCheckFunctionCall_thenTrue() {
     VCFCodec vcfCodec = vcfParserImpl.generateCodecFromHeaderLines(headerLines);
-    assertThat(vcfCodec instanceof VCFCodec).isTrue();
+
+    assertThat(vcfCodec).isNotNull();
   }
 
   @Test
-  public void testGenerateCodecFromHeaderLines_withOutVCFVersion_thenThrowException() {
+  public void testGenerateCodecFromHeaderLines_withOutVcfVersion_thenThrowException() {
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<>();
     headerLinesBuilder.add("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNA00001\tNA00002\tNA00003");
 
