@@ -43,6 +43,7 @@ public class VcfParserImplTest {
   @Test
   public void testGenerateCodecFromHeaderLines_withOutVcfVersion_thenThrowException() {
     ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<>();
+    headerLinesBuilder.add("##fileDate=20090805");
     headerLinesBuilder.add("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNA00001\tNA00002\tNA00003");
 
     // without specifying VCF version will throw TribbleException.InvalidHeader exception
@@ -60,9 +61,21 @@ public class VcfParserImplTest {
 
     // without VCF header line will throw TribbleException.InvalidHeader exception
     Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
-            vcfParserImpl.generateCodecFromHeaderLines(headerLinesBuilder.build()));
+        vcfParserImpl.generateCodecFromHeaderLines(headerLinesBuilder.build()));
 
     assertThat(invalidHeaderException).hasMessageThat().contains("We never saw the required CHROM header line");
   }
 
+  @Test
+  public void testGenerateCodecFromHeaderLines_wrongHeaderFormat_thenThrowException() {
+    ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<>();
+    headerLinesBuilder.add("##fileformat=VCFv4.3");
+    headerLinesBuilder.add("#CHROM  POS  ID  REF  ALT  QUAL  FILTER  INFO  FORMAT  NA00001  NA00002  NA00003");
+
+    // Invalid VCF header line format will throw TribbleException.InvalidHeader exception
+    Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
+            vcfParserImpl.generateCodecFromHeaderLines(headerLinesBuilder.build()));
+
+    assertThat(invalidHeaderException).hasMessageThat().contains("there are not enough columns present in the header line");
+  }
 }
