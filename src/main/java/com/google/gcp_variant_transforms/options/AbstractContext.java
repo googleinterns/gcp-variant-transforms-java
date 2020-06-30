@@ -2,7 +2,6 @@
 
 package com.google.gcp_variant_transforms.options;
 
-import org.apache.beam.sdk.io.FileSystems;
 import org.apache.beam.sdk.options.PipelineOptions;
 import java.io.IOException;
 
@@ -10,7 +9,6 @@ import java.io.IOException;
 public abstract class AbstractContext {
 
   public AbstractContext(PipelineOptions options) {
-    configureFilesystems(options);
   }
 
   /**
@@ -20,8 +18,4 @@ public abstract class AbstractContext {
    */
   protected abstract void validateFlags() throws IOException;
 
-  /** configures filesystem to the corresponding options, regardless of task. */
-  private void configureFilesystems(PipelineOptions options) {
-    FileSystems.setDefaultPipelineOptions(options);
-  }
 }
