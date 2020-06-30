@@ -14,8 +14,8 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * Dummy implementation of {@link HeaderReader}, which sequentially reads headers from single
- * a file. Used for Demo.
+ * Dummy implementation of {@link HeaderReader}, which sequentially reads headers from a single
+ * file. Used for Demo.
  */
 public class DummyHeaderReader implements HeaderReader {
 
