@@ -26,6 +26,6 @@ public class ConvertLineToVariantFn extends DoFn<String, Variant> {
     if (vcfCodec == null) {
       vcfCodec = vcfParser.generateCodecFromHeaderLines(headerLines);
     }
-    receiver.output(new Variant(vcfCodec.decode(record)));
+    receiver.output(new Variant(vcfCodec.decode(record), vcfCodec.getHeader()));
   }
 }
