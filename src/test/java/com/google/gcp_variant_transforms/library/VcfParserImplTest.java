@@ -6,11 +6,14 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gcp_variant_transforms.TestEnv;
+import com.google.guiceberry.junit4.GuiceBerryRule;
+import com.google.inject.Inject;
 import htsjdk.tribble.TribbleException;
 import htsjdk.variant.vcf.VCFCodec;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
@@ -25,8 +28,11 @@ public class VcfParserImplTest {
   private static final String INVALID_HEADER = "#CHROM  POS  ID  REF  ALT  QUAL  FILTER  INFO  " +
           "FORMAT  NA00001 NA00002  NA00003";
 
-  @InjectMocks
-  VcfParserImpl vcfParserImpl;
+  @Rule
+  public final GuiceBerryRule guiceBerry = new GuiceBerryRule(TestEnv.class);
+
+  @Inject
+  public VcfParser vcfParser;
 
   ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<>();
 
@@ -34,7 +40,7 @@ public class VcfParserImplTest {
   public void testGenerateCodecFromHeaderLines_whenCheckFunctionCall_thenTrue() {
     headerLinesBuilder.add(FILE_FORMAT);
     headerLinesBuilder.add(VALID_HEADER);
-    VCFCodec vcfCodec = vcfParserImpl.generateCodecFromHeaderLines(headerLinesBuilder.build());
+    VCFCodec vcfCodec = vcfParser.generateCodecFromHeaderLines(headerLinesBuilder.build());
 
     assertThat(vcfCodec).isNotNull();
   }
@@ -46,7 +52,7 @@ public class VcfParserImplTest {
 
     // without specifying VCF version will throw TribbleException.InvalidHeader exception
     Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
-        vcfParserImpl.generateCodecFromHeaderLines(headerLinesBuilder.build()));
+              vcfParser.generateCodecFromHeaderLines(headerLinesBuilder.build()));
 
     assertThat(invalidHeaderException).hasMessageThat()
                .contains("We never saw a header line specifying VCF version");
@@ -59,7 +65,7 @@ public class VcfParserImplTest {
 
     // without VCF header line will throw TribbleException.InvalidHeader exception
     Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
-        vcfParserImpl.generateCodecFromHeaderLines(headerLinesBuilder.build()));
+              vcfParser.generateCodecFromHeaderLines(headerLinesBuilder.build()));
 
     assertThat(invalidHeaderException).hasMessageThat()
                .contains("We never saw the required CHROM header line");
@@ -72,7 +78,7 @@ public class VcfParserImplTest {
 
     // Invalid VCF header line format will throw TribbleException.InvalidHeader exception
     Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
-            vcfParserImpl.generateCodecFromHeaderLines(headerLinesBuilder.build()));
+              vcfParser.generateCodecFromHeaderLines(headerLinesBuilder.build()));
 
     assertThat(invalidHeaderException).hasMessageThat()
                .contains("there are not enough columns present in the header line");
