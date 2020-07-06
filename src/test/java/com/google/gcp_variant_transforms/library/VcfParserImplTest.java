@@ -13,13 +13,10 @@ import htsjdk.tribble.TribbleException;
 import htsjdk.variant.vcf.VCFCodec;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Units tests for VcfParserImpl.java
  */
-@RunWith(MockitoJUnitRunner.class)
 public class VcfParserImplTest {
   private static final String FILE_FORMAT = "##fileformat=VCFv4.3";
   private static final String FILE_DATE = "##fileDate=20090805";
