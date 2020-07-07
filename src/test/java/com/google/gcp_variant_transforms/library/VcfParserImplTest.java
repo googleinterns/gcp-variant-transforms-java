@@ -31,53 +31,40 @@ public class VcfParserImplTest {
   @Inject
   public VcfParser vcfParser;
 
-  ImmutableList.Builder<String> headerLinesBuilder = new ImmutableList.Builder<>();
-
   @Test
   public void testGenerateCodecFromHeaderLines_whenCheckFunctionCall_thenTrue() {
-    headerLinesBuilder.add(FILE_FORMAT);
-    headerLinesBuilder.add(VALID_HEADER);
-    VCFCodec vcfCodec = vcfParser.generateCodecFromHeaderLines(headerLinesBuilder.build());
+    VCFCodec vcfCodec = vcfParser.generateCodecFromHeaderLines(ImmutableList.of(FILE_FORMAT, VALID_HEADER));
 
     assertThat(vcfCodec).isNotNull();
   }
 
   @Test
   public void testGenerateCodecFromHeaderLines_withoutVcfVersion_thenThrowException() {
-    headerLinesBuilder.add(FILE_DATE);
-    headerLinesBuilder.add(VALID_HEADER);
-
     // without specifying VCF version will throw TribbleException.InvalidHeader exception
     Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
-              vcfParser.generateCodecFromHeaderLines(headerLinesBuilder.build()));
+          vcfParser.generateCodecFromHeaderLines(ImmutableList.of(FILE_DATE, VALID_HEADER)));
 
     assertThat(invalidHeaderException).hasMessageThat()
-               .contains("We never saw a header line specifying VCF version");
+          .contains("We never saw a header line specifying VCF version");
   }
 
   @Test
   public void testGenerateCodecFromHeaderLines_withoutHeaderLine_thenThrowException() {
-    headerLinesBuilder.add(FILE_FORMAT);
-    headerLinesBuilder.add(FILE_DATE);
-
     // without VCF header line will throw TribbleException.InvalidHeader exception
     Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
-              vcfParser.generateCodecFromHeaderLines(headerLinesBuilder.build()));
+          vcfParser.generateCodecFromHeaderLines(ImmutableList.of(FILE_FORMAT, FILE_DATE)));
 
     assertThat(invalidHeaderException).hasMessageThat()
-               .contains("We never saw the required CHROM header line");
+          .contains("We never saw the required CHROM header line");
   }
 
   @Test
   public void testGenerateCodecFromHeaderLines_wrongHeaderFormat_thenThrowException() {
-    headerLinesBuilder.add(FILE_FORMAT);
-    headerLinesBuilder.add(INVALID_HEADER);
-
     // Invalid VCF header line format will throw TribbleException.InvalidHeader exception
     Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
-              vcfParser.generateCodecFromHeaderLines(headerLinesBuilder.build()));
+          vcfParser.generateCodecFromHeaderLines(ImmutableList.of(FILE_FORMAT, INVALID_HEADER)));
 
     assertThat(invalidHeaderException).hasMessageThat()
-               .contains("there are not enough columns present in the header line");
+          .contains("there are not enough columns present in the header line");
   }
 }
