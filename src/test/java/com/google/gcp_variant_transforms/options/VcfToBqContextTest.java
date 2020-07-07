@@ -18,6 +18,7 @@ public class VcfToBqContextTest {
   
   private static final String INPUT_FILE = "sampleInputFile.txt";
   private static final String OUTPUT = "sampleOutput";
+  private final VcfToBqOptions MOCKED_VCFTOBQ_OPTIONS = create_mockedVcfToBqOptions(INPUT_FILE, OUTPUT);
  
   public VcfToBqOptions create_mockedVcfToBqOptions(String inputFile, String output) {
     VcfToBqOptions mockedVcfToBqOptions = mock(VcfToBqOptions.class);
@@ -36,8 +37,7 @@ public class VcfToBqContextTest {
  
   @Test
   public void testVcfContextConstructor_whenCompareFields_thenMatches() throws IOException {
-    VcfToBqOptions mockedVcfToBqOptions = create_mockedVcfToBqOptions(INPUT_FILE, OUTPUT);
-    VcfToBqContext vcfToBqContext = new VcfToBqContext(mockedVcfToBqOptions);
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCFTOBQ_OPTIONS);
  
     assertThat(vcfToBqContext.getInputFile()).matches(INPUT_FILE);
     assertThat(vcfToBqContext.getOutput()).matches(OUTPUT);
@@ -54,10 +54,7 @@ public class VcfToBqContextTest {
  
   @Test
   public void testVcfContext_whenGetInputFile_thenMatches() throws IOException {
-    VcfToBqOptions mockedVcfToBqOptions = create_mockedVcfToBqOptions(
-        INPUT_FILE,
-        OUTPUT);
-    VcfToBqContext vcfToBqContext = new VcfToBqContext(mockedVcfToBqOptions);
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCFTOBQ_OPTIONS);
  
     assertThat(vcfToBqContext.getInputFile()).matches(INPUT_FILE);
   }
@@ -74,10 +71,7 @@ public class VcfToBqContextTest {
  
   @Test
   public void testVcfContext_whenGetOutput_thenMatches() throws IOException {
-    VcfToBqOptions mockedVcfToBqOptions = create_mockedVcfToBqOptions(
-        INPUT_FILE,
-        OUTPUT);
-    VcfToBqContext vcfToBqContext = new VcfToBqContext(mockedVcfToBqOptions);   
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCFTOBQ_OPTIONS);   
  
     assertThat(vcfToBqContext.getOutput()).matches(OUTPUT);
   }
@@ -94,10 +88,7 @@ public class VcfToBqContextTest {
  
  @Test
  public void testVcfContext_whenSetHeaderLines_thenMatches() throws IOException {
-    VcfToBqOptions mockedVcfToBqOptions = create_mockedVcfToBqOptions(
-        INPUT_FILE,
-        OUTPUT);
-    VcfToBqContext vcfToBqContext = new VcfToBqContext(mockedVcfToBqOptions);   
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCFTOBQ_OPTIONS);   
     ImmutableList<String> headerLines = createHeaderLines();
     vcfToBqContext.setHeaderLines(headerLines);
  
@@ -106,10 +97,7 @@ public class VcfToBqContextTest {
  
   @Test
   public void testVcfContext_whenSetHeaderLines_thenNull() throws IOException {
-    VcfToBqOptions mockedVcfToBqOptions = create_mockedVcfToBqOptions(
-        INPUT_FILE,
-        OUTPUT);
-    VcfToBqContext vcfToBqContext = new VcfToBqContext(mockedVcfToBqOptions);   
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCFTOBQ_OPTIONS);   
     vcfToBqContext.setHeaderLines(null);
  
     assertThat(vcfToBqContext.getHeaderLines()).isNull();
@@ -117,10 +105,7 @@ public class VcfToBqContextTest {
  
   @Test
   public void testVcfContext_whenGetHeaderLines_thenNull() throws IOException {
-    VcfToBqOptions mockedVcfToBqOptions = create_mockedVcfToBqOptions(
-        INPUT_FILE,
-        OUTPUT);
-    VcfToBqContext vcfToBqContext = new VcfToBqContext(mockedVcfToBqOptions);   
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCFTOBQ_OPTIONS);   
  
     assertThat(vcfToBqContext.getHeaderLines()).isNull();
   }
