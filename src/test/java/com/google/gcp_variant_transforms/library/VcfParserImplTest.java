@@ -23,7 +23,7 @@ public class VcfParserImplTest {
   private static final String VALID_HEADER = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" +
           "\tFORMAT\tNA00001\tNA00002\tNA00003";
   private static final String INVALID_HEADER = "#CHROM  POS  ID  REF  ALT  QUAL  FILTER  INFO  " +
-          "FORMAT  NA00001 NA00002  NA00003";
+          "FORMAT NA00001 NA00002  NA00003";
 
   @Rule
   public final GuiceBerryRule guiceBerry = new GuiceBerryRule(TestEnv.class);
