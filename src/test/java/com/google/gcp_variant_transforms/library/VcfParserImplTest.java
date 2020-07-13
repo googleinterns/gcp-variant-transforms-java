@@ -22,7 +22,7 @@ public class VcfParserImplTest {
   private static final String FILE_DATE = "##fileDate=20090805";
   private static final String VALID_HEADER = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" +
           "\tFORMAT\tNA00001\tNA00002\tNA00003";
-  private static final String INVALID_HEADER = "#CHROM  POS  ID  REF  ALT  QUAL  FILTER  INFO  " +
+  private static final String INVALID_HEADER = "#CHROM POS  ID  REF  ALT  QUAL  FILTER  INFO  " +
           "FORMAT NA00001 NA00002  NA00003";
 
   @Rule
