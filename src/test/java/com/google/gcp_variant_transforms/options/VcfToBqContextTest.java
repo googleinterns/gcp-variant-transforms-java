@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
  
 import com.google.common.collect.ImmutableList;
+import htsjdk.variant.vcf.VCFHeader;
 import java.io.IOException;
 import org.junit.Test;
  
@@ -43,6 +44,7 @@ public class VcfToBqContextTest {
     assertThat(vcfToBqContext.getInputFile()).matches(INPUT_FILE);
     assertThat(vcfToBqContext.getOutput()).matches(OUTPUT);
     assertThat(vcfToBqContext.getHeaderLines()).isNull();
+    assertThat(vcfToBqContext.getVCFHeader()).isNull();
  }
  
   @Test
@@ -110,4 +112,21 @@ public class VcfToBqContextTest {
  
     assertThat(vcfToBqContext.getHeaderLines()).isNull();
   }
+
+  @Test
+  public void testVcfContext_whenGetVCFHeader_thenNull() throws IOException {
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
+ 
+    assertThat(vcfToBqContext.getVCFHeader()).isNull();
+  }
+
+  @Test
+  public void testVcfContext_whenSetVCFHeader_thenNotNull() throws IOException {
+     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
+     VCFHeader vcfHeader = mock(VCFHeader.class);
+     vcfToBqContext.setVCFHeader(vcfHeader);
+  
+     assertThat(vcfToBqContext.getVCFHeader()).isNotNull();
+   }
+
 }
