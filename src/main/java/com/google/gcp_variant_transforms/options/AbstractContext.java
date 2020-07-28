@@ -10,7 +10,6 @@ import java.io.IOException;
 public abstract class AbstractContext {
 
   public AbstractContext(PipelineOptions options) {
-    configureFilesystems(options);
   }
 
   /**
@@ -20,8 +19,4 @@ public abstract class AbstractContext {
    */
   protected abstract void validateFlags() throws IOException;
 
-  /** configures filesystem to the corresponding options, regardless of task. */
-  private void configureFilesystems(PipelineOptions options) {
-    FileSystems.setDefaultPipelineOptions(options);
-  }
 }
