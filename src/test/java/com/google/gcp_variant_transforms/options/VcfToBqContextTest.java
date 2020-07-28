@@ -73,10 +73,10 @@ public class VcfToBqContextTest {
   }
  
   @Test
-  public void testVcfContext_whenGetOutput_thenMatches() throws IOException {
+  public void testVcfContext_whenGetOutput_thenIsEqualTo() throws IOException {
     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
  
-    assertThat(vcfToBqContext.getOutput()).matches(OUTPUT);
+    assertThat(vcfToBqContext.getOutput()).isEqualTo(OUTPUT);
   }
  
   @Test
@@ -90,7 +90,7 @@ public class VcfToBqContextTest {
   }
  
  @Test
- public void testVcfContext_whenSetHeaderLines_thenMatches() throws IOException {
+ public void testVcfContext_whenSetHeaderLines_thenIsEqualTo() throws IOException {
     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
     ImmutableList<String> headerLines = createHeaderLines();
     vcfToBqContext.setHeaderLines(headerLines);
