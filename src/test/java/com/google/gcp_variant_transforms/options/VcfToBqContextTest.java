@@ -38,7 +38,7 @@ public class VcfToBqContextTest {
   }
  
   @Test
-  public void testVcfContextConstructor_whenCompareFields_thenMatches() throws IOException {
+  public void testVcfContextConstructor_whenCompareFields_thenIsEqualTo() throws IOException {
     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);
  
     assertThat(vcfToBqContext.getInputFile()).matches(INPUT_FILE);
@@ -128,5 +128,4 @@ public class VcfToBqContextTest {
   
      assertThat(vcfToBqContext.getVCFHeader()).isNotNull();
    }
-
 }
