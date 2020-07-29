@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.task.VcfToBqTask;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import htsjdk.variant.vcf.VCFHeader;
 import org.apache.beam.sdk.options.PipelineOptions;
 import java.io.IOException;
 
@@ -16,6 +17,7 @@ public class VcfToBqContext extends AbstractContext {
   private final String inputFile;
   private final String output;
   private ImmutableList<String> headerLines = null;
+  private VCFHeader vcfHeader = null;
 
   @Inject
   public VcfToBqContext(VcfToBqOptions options) throws IOException {
@@ -47,5 +49,13 @@ public class VcfToBqContext extends AbstractContext {
 
   public ImmutableList<String> getHeaderLines() {
     return headerLines;
+  }
+
+  public VCFHeader getVCFHeader(){
+    return vcfHeader;
+  }
+
+  public void setVCFHeader(VCFHeader vcfHeader){
+    this.vcfHeader = vcfHeader;
   }
 }

@@ -11,6 +11,7 @@ import com.google.guiceberry.junit4.GuiceBerryRule;
 import com.google.inject.Inject;
 import htsjdk.tribble.TribbleException;
 import htsjdk.variant.vcf.VCFCodec;
+import htsjdk.variant.vcf.VCFHeader;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -66,5 +67,32 @@ public class VcfParserImplTest {
 
     assertThat(invalidHeaderException).hasMessageThat()
           .contains("there are not enough columns present in the header line");
+  }
+
+  @Test
+  public void testGenerateVCFHeader_withoutHeaderLine_thenThrowException() {
+    // Invalid VCF header line format will throw TribbleException.InvalidHeader exception
+    Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
+          vcfParser.generateVCFHeader(ImmutableList.of(FILE_FORMAT, INVALID_HEADER)));
+
+    assertThat(invalidHeaderException).hasMessageThat()
+          .contains("there are not enough columns present in the header line");
+  }
+
+  @Test
+  public void testGenerateVCFHeader_whenCheckFunctionCall_thenTrue() {
+    VCFHeader vcfHeader = vcfParser.generateVCFHeader(ImmutableList.of(FILE_FORMAT, VALID_HEADER));
+
+    assertThat(vcfHeader).isNotNull();
+  }
+
+  @Test
+  public void testGenerateVCFHeader_withoutVcfVersion_thenThrowException() {
+    // without specifying VCF version will throw TribbleException.InvalidHeader exception
+    Exception invalidHeaderException = assertThrows(TribbleException.class, () ->
+          vcfParser.generateVCFHeader(ImmutableList.of(FILE_DATE, VALID_HEADER)));
+
+    assertThat(invalidHeaderException).hasMessageThat()
+          .contains("We never saw a header line specifying VCF version");
   }
 }

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
  
 import com.google.common.collect.ImmutableList;
+import htsjdk.variant.vcf.VCFHeader;
 import java.io.IOException;
 import org.junit.Test;
  
@@ -37,12 +38,13 @@ public class VcfToBqContextTest {
   }
  
   @Test
-  public void testVcfContextConstructor_whenCompareFields_thenMatches() throws IOException {
+  public void testVcfContextConstructor_whenCompareFields_thenIsEqualTo() throws IOException {
     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);
  
     assertThat(vcfToBqContext.getInputFile()).matches(INPUT_FILE);
     assertThat(vcfToBqContext.getOutput()).matches(OUTPUT);
     assertThat(vcfToBqContext.getHeaderLines()).isNull();
+    assertThat(vcfToBqContext.getVCFHeader()).isNull();
  }
  
   @Test
@@ -71,10 +73,10 @@ public class VcfToBqContextTest {
   }
  
   @Test
-  public void testVcfContext_whenGetOutput_thenMatches() throws IOException {
+  public void testVcfContext_whenGetOutput_thenIsEqualTo() throws IOException {
     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
  
-    assertThat(vcfToBqContext.getOutput()).matches(OUTPUT);
+    assertThat(vcfToBqContext.getOutput()).isEqualTo(OUTPUT);
   }
  
   @Test
@@ -88,7 +90,7 @@ public class VcfToBqContextTest {
   }
  
  @Test
- public void testVcfContext_whenSetHeaderLines_thenMatches() throws IOException {
+ public void testVcfContext_whenSetHeaderLines_thenIsEqualTo() throws IOException {
     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
     ImmutableList<String> headerLines = createHeaderLines();
     vcfToBqContext.setHeaderLines(headerLines);
@@ -110,4 +112,20 @@ public class VcfToBqContextTest {
  
     assertThat(vcfToBqContext.getHeaderLines()).isNull();
   }
+
+  @Test
+  public void testVcfContext_whenGetVCFHeader_thenNull() throws IOException {
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
+ 
+    assertThat(vcfToBqContext.getVCFHeader()).isNull();
+  }
+
+  @Test
+  public void testVcfContext_whenSetVCFHeader_thenIsEqualTo() throws IOException {
+     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
+     VCFHeader vcfHeader = mock(VCFHeader.class);
+     vcfToBqContext.setVCFHeader(vcfHeader);
+  
+     assertThat(vcfToBqContext.getVCFHeader()).isEqualTo(vcfHeader);
+   }
 }

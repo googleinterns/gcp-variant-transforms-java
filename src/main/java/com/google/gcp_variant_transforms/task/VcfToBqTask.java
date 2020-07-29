@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.gcp_variant_transforms.beam.PipelineRunner;
 import com.google.gcp_variant_transforms.library.HeaderReader;
+import com.google.gcp_variant_transforms.library.VcfParser;
 import com.google.gcp_variant_transforms.options.VcfToBqContext;
 import com.google.gcp_variant_transforms.options.VcfToBqOptions;
 
@@ -22,6 +23,7 @@ public class VcfToBqTask implements Task {
   private final HeaderReader headerReader;
   private final PipelineRunner pipelineRunner;
   private final VcfToBqContext context;
+  private final VcfParser parser;
   private final PipelineOptions options;
 
   @Inject
@@ -29,10 +31,12 @@ public class VcfToBqTask implements Task {
         PipelineRunner pipelineRunner,
         HeaderReader headerReader,
         VcfToBqContext context,
+        VcfParser parser,
         VcfToBqOptions options) throws IOException {
     this.pipelineRunner = pipelineRunner;
     this.headerReader = headerReader;
     this.context = context;
+    this.parser = parser;
     this.options = (PipelineOptions) options;
   }
 
@@ -40,6 +44,7 @@ public class VcfToBqTask implements Task {
   public void run() throws IOException {
     setPipelineOptions(this.options);
     context.setHeaderLines(headerReader.getHeaderLines());
+    context.setVCFHeader(parser.generateVCFHeader(context.getHeaderLines()));
     pipelineRunner.runPipeline();
   }
 
