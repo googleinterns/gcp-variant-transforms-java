@@ -9,6 +9,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.gcp_variant_transforms.beam.PipelineRunner;
 import com.google.gcp_variant_transforms.library.HeaderReader;
+import com.google.gcp_variant_transforms.library.SchemaGenerator;
+import com.google.gcp_variant_transforms.library.VcfParser;
 import com.google.gcp_variant_transforms.options.VcfToBqContext;
 import com.google.gcp_variant_transforms.options.VcfToBqOptions;
 
@@ -22,24 +24,32 @@ public class VcfToBqTask implements Task {
   private final HeaderReader headerReader;
   private final PipelineRunner pipelineRunner;
   private final VcfToBqContext context;
+  private final VcfParser parser;
   private final PipelineOptions options;
+  private final SchemaGenerator schemaGenerator;
 
   @Inject
   public VcfToBqTask(
         PipelineRunner pipelineRunner,
         HeaderReader headerReader,
         VcfToBqContext context,
-        VcfToBqOptions options) throws IOException {
+        VcfParser parser,
+        VcfToBqOptions options, 
+        SchemaGenerator schemaGenerator) throws IOException {
     this.pipelineRunner = pipelineRunner;
     this.headerReader = headerReader;
     this.context = context;
+    this.parser = parser;
     this.options = (PipelineOptions) options;
+    this.schemaGenerator = schemaGenerator;
   }
 
   @Override
   public void run() throws IOException {
     setPipelineOptions(this.options);
     context.setHeaderLines(headerReader.getHeaderLines());
+    context.setVCFHeader(parser.generateVCFHeader(context.getHeaderLines()));
+    context.setBqSchema(schemaGenerator.getSchema(context.getVCFHeader()));
     pipelineRunner.runPipeline();
   }
 
