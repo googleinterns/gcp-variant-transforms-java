@@ -121,11 +121,11 @@ public class VcfToBqContextTest {
   }
 
   @Test
-  public void testVcfContext_whenSetVCFHeader_thenNotNull() throws IOException {
+  public void testVcfContext_whenSetVCFHeader_thenIsEqualTo() throws IOException {
      VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
      VCFHeader vcfHeader = mock(VCFHeader.class);
      vcfToBqContext.setVCFHeader(vcfHeader);
   
-     assertThat(vcfToBqContext.getVCFHeader()).isNotNull();
+     assertThat(vcfToBqContext.getVCFHeader()).isEqualTo(vcfHeader);
    }
 }
