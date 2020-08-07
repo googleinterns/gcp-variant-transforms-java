@@ -52,6 +52,8 @@ public class VcfToBqTask implements Task {
     context.setBqSchema(schemaGenerator.getSchema(context.getVCFHeader()));
     pipelineRunner.runPipeline();
   }
+
+  /** configures filesystem to the corresponding options, regardless of task. */
   protected void setPipelineOptions(PipelineOptions options) {
     FileSystems.setDefaultPipelineOptions(options);
   }
