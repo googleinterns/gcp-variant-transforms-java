@@ -31,20 +31,12 @@ import java.util.Map;
  * Units tests for VariantToBqUtils.java
  */
 public class VariantToBqUtilsTest {
-  private static final String TEST_REFERENCE_NAME = "20";
   private static final String TEST_ID= "id";
   private static final String TEST_REFERENCE_BASES = "G";
   private static final String TEST_ALTERNATE_BASES = "A";
   private static final String TEST_CALLS_NAME = "sample";
-  private static final String DEFAULT_PHASE_SET = "*";
-  private static final boolean TEST_DB = true;
-  private static final boolean TEST_H2 = true;
   private static final double TEST_AF = 0.333;
-  private static final int TEST_START = 14370;
-  private static final int TEST_END = 14370;
   private static final int TEST_NS = 2;
-  private static final int TEST_DP = 14;
-  private static final int TEST_GENOTYPE= 1;
   private static final int DEFAULT_GENOTYPE = -1;
 
   VariantContext variantContext;
