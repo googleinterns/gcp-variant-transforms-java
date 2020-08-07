@@ -50,6 +50,7 @@ public class VcfToBqTask implements Task {
     context.setHeaderLines(headerReader.getHeaderLines());
     context.setVCFHeader(parser.generateVCFHeader(context.getHeaderLines()));
     context.setBqSchema(schemaGenerator.getSchema(context.getVCFHeader()));
+    pipelineRunner.runPipeline();
   }
   protected void setPipelineOptions(PipelineOptions options) {
     FileSystems.setDefaultPipelineOptions(options);
