@@ -15,7 +15,7 @@ public class ConvertVariantToRowFn extends DoFn<VariantContext, TableRow> {
   private BigQueryRowGenerator bigQueryRowGenerator;
   private VCFHeader vcfHeader;
 
-  public ConvertVariantToRowFn(VCFHeader vcfHeader, BigQueryRowGenerator bigQueryRowGenerator) {
+  public ConvertVariantToRowFn(BigQueryRowGenerator bigQueryRowGenerator, VCFHeader vcfHeader) {
     this.bigQueryRowGenerator = bigQueryRowGenerator;
     this.vcfHeader = vcfHeader;
   }

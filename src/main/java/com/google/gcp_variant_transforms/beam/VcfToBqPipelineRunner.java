@@ -48,8 +48,8 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
 
     PCollection<TableRow> tableRowPCollection = variantContextPCollection
             .apply("VariantContextToBQRow",
-                    ParDo.of(new ConvertVariantToRowFn(context.getVCFHeader(),
-                            bigQueryRowGenerator)));
+                    ParDo.of(new ConvertVariantToRowFn(bigQueryRowGenerator,
+                            context.getVCFHeader())));
 
     variantContextPCollection.apply(
           MapElements

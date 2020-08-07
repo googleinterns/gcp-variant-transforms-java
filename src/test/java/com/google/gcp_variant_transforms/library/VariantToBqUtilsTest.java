@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.bigquery.model.TableRow;
+import com.google.gcp_variant_transforms.common.Constants;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.GenotypesContext;
@@ -30,23 +31,105 @@ import java.util.Map;
  * Units tests for VariantToBqUtils.java
  */
 public class VariantToBqUtilsTest {
-  private static final String ALTERNATE_BASES_ALT = "alt";
-  private static final String CALLS_NAME = "name";
-  private static final String CALLS_GENOTYPE = "genotype";
-  private static final String CALLS_PHASESET = "phaseset";
-  private static final String DEFAULT_PHASESET = "*";
-  private static final String MISSING_FIELD_VALUE = ".";
+  private static final String TEST_REFERENCE_NAME = "20";
+  private static final String TEST_ID= "id";
+  private static final String TEST_REFERENCE_BASES = "G";
+  private static final String TEST_ALTERNATE_BASES = "A";
+  private static final String TEST_CALLS_NAME = "sample";
+  private static final String DEFAULT_PHASE_SET = "*";
+  private static final boolean TEST_DB = true;
+  private static final boolean TEST_H2 = true;
+  private static final double TEST_AF = 0.333;
+  private static final int TEST_START = 14370;
+  private static final int TEST_END = 14370;
+  private static final int TEST_NS = 2;
+  private static final int TEST_DP = 14;
+  private static final int TEST_GENOTYPE= 1;
+  private static final int DEFAULT_GENOTYPE = -1;
 
   VariantContext variantContext;
   GenotypesContext genotypesContext;
   VCFHeader vcfHeader;
+  Genotype sample;
+  Allele firstGenotypeAllele;
+  Allele secondGenotypeAllele;
+  Map<String, Integer> alleleIndexingMap = new HashMap<>();
+  Map<String, Object> extendedAttributes = new HashMap<>();
 
   @Before
   public void constructMockClasses() {
     variantContext = mock(VariantContext.class);
     vcfHeader = mock(VCFHeader.class);
     genotypesContext = mock(GenotypesContext.class);
+    sample = mock(Genotype.class);
+    firstGenotypeAllele = mock(Allele.class);
+    secondGenotypeAllele = mock(Allele.class);
   }
+
+  /**
+   * Mock VCF Header Lines:
+   * ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
+   * ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+   * ##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
+   * ##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
+   */
+  @Before
+  public void mockVCFHeader() {
+    VCFInfoHeaderLine NSMetadata = mock(VCFInfoHeaderLine.class);
+    when(vcfHeader.getInfoHeaderLine("NS")).thenReturn(NSMetadata);
+    when(NSMetadata.getType()).thenReturn(VCFHeaderLineType.Integer);
+    when(NSMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
+
+    VCFInfoHeaderLine AFMetadata = mock(VCFInfoHeaderLine.class);
+    when(vcfHeader.getInfoHeaderLine("AF")).thenReturn(AFMetadata);
+    when(AFMetadata.getType()).thenReturn(VCFHeaderLineType.Float);
+    when(AFMetadata.getCountType()).thenReturn(VCFHeaderLineCount.A);
+
+    // mock VCF header in Calls
+    VCFFormatHeaderLine DPMetadata = mock(VCFFormatHeaderLine.class);
+    when(vcfHeader.getFormatHeaderLine("DP")).thenReturn(DPMetadata);
+    when(DPMetadata.getType()).thenReturn(VCFHeaderLineType.Integer);
+    when(DPMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
+
+    VCFFormatHeaderLine HQMetadata = mock(VCFFormatHeaderLine.class);
+    when(vcfHeader.getFormatHeaderLine("HQ")).thenReturn(HQMetadata);
+    when(HQMetadata.getType()).thenReturn(VCFHeaderLineType.Integer);
+    when(HQMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
+  }
+
+  /**
+   * Mock Genotype record:
+   * FORMAT           sample
+   * GT:DP:PS:HQ    1|2:1:0:23,27
+   * GT:DP:HQ         .:1:.,.
+   */
+  @Before
+  public void mockGenotypeContext() {
+    when(sample.getSampleName()).thenReturn(TEST_CALLS_NAME);
+    when(firstGenotypeAllele.getDisplayString()).thenReturn("G");
+    alleleIndexingMap.put("G", 1);
+    when(secondGenotypeAllele.getDisplayString()).thenReturn("A");
+    alleleIndexingMap.put("A", 2);
+    when(sample.getAlleles()).thenReturn(Arrays.asList(firstGenotypeAllele, secondGenotypeAllele));
+
+    // mock info
+    when(sample.hasAD()).thenReturn(false);
+    when(sample.hasDP()).thenReturn(true);
+    when(sample.getDP()).thenReturn(1);
+    when(sample.hasGQ()).thenReturn(false);
+    when(sample.hasPL()).thenReturn(false);
+    extendedAttributes.put("HQ", "23,27");
+    extendedAttributes.put("PS", "0");
+    when(sample.getExtendedAttributes()).thenReturn(extendedAttributes);
+
+    // add sample to genotypeContext
+    Iterator<Genotype> genotypeIterator = mock(Iterator.class);
+    when(genotypeIterator.hasNext()).thenReturn(true, false);
+    when(genotypeIterator.next()).thenReturn(sample);
+    when(genotypesContext.iterator()).thenReturn(genotypeIterator);
+
+  }
+
 
   @Test
   public void testConvertStringValueToRightValueType_whenComparingElement_thenTrue() {
@@ -75,21 +158,21 @@ public class VariantToBqUtilsTest {
   }
 
   @Test
-  public void testBuildReferenceBase_whenComparingElement_thenTrue() {
+  public void testAddReferenceBase_whenComparingElement_thenTrue() {
     Allele refAllele = mock(Allele.class);
-    when(refAllele.getDisplayString()).thenReturn("A");   // mock reference value
+    when(refAllele.getDisplayString()).thenReturn(TEST_REFERENCE_BASES);   // mock reference value
     when(variantContext.getReference()).thenReturn(refAllele);
 
-    assertThat(VariantToBqUtils.buildReferenceBase(variantContext)).isEqualTo("A");
+    assertThat(VariantToBqUtils.addReferenceBase(variantContext)).isEqualTo(TEST_REFERENCE_BASES);
   }
 
   @Test
-  public void testBuildNames_whenComparingElement_thenTrue() {
-    when(variantContext.getID()).thenReturn("id");
-    assertThat(VariantToBqUtils.buildNames(variantContext)).isEqualTo("id");
+  public void testAddNames_whenComparingElement_thenTrue() {
+    when(variantContext.getID()).thenReturn(TEST_ID);
+    assertThat(VariantToBqUtils.addNames(variantContext)).isEqualTo(TEST_ID);
     // test empty fields
-    when(variantContext.getID()).thenReturn(MISSING_FIELD_VALUE);
-    assertThat(VariantToBqUtils.buildNames(variantContext)).isNull();
+    when(variantContext.getID()).thenReturn(Constants.MISSING_FIELD_VALUE);
+    assertThat(VariantToBqUtils.addNames(variantContext)).isNull();
 
   }
 
@@ -104,13 +187,15 @@ public class VariantToBqUtilsTest {
     when(variantContext.getAlternateAlleles()).thenReturn(alternateList);
     List<TableRow> missingFieldTableRow = VariantToBqUtils.addAlternates(variantContext,
             alleleIndexingMap);
-    assertThat(missingFieldTableRow.get(0).get(ALTERNATE_BASES_ALT)).isNull();
+    assertThat(missingFieldTableRow.get(0).
+            get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isNull();
 
     // test alt field has value "T"
     alternateList.add(altAllele);
     List<TableRow> altFieldTableRow = VariantToBqUtils.addAlternates(variantContext,
             alleleIndexingMap);
-    assertThat(altFieldTableRow.get(0).get(ALTERNATE_BASES_ALT)).isEqualTo("T");
+    assertThat(altFieldTableRow.get(0).
+            get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isEqualTo("T");
   }
 
 
@@ -128,31 +213,21 @@ public class VariantToBqUtilsTest {
     info.put("AF", "0.333");
     when(variantContext.getAttributes()).thenReturn(info);
 
-    VCFInfoHeaderLine NSMetadata = mock(VCFInfoHeaderLine.class);
-    when(vcfHeader.getInfoHeaderLine("NS")).thenReturn(NSMetadata);
-    when(NSMetadata.getType()).thenReturn(VCFHeaderLineType.Integer);
-    when(NSMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
-
-    VCFInfoHeaderLine AFMetadata = mock(VCFInfoHeaderLine.class);
-    when(vcfHeader.getInfoHeaderLine("AF")).thenReturn(AFMetadata);
-    when(AFMetadata.getType()).thenReturn(VCFHeaderLineType.Float);
-    when(AFMetadata.getCountType()).thenReturn(VCFHeaderLineCount.A);
-
     // mock alt field
     List<TableRow> altMetadata = new ArrayList<>();
     altMetadata.add(new TableRow());
-    altMetadata.get(0).set(ALTERNATE_BASES_ALT, "A");
+    altMetadata.get(0).set(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT, TEST_ALTERNATE_BASES);
 
     TableRow row = new TableRow();
     VariantToBqUtils.addInfo(row, variantContext, altMetadata, vcfHeader);
 
     assertThat(row.containsKey("NS")).isTrue();
-    assertThat(row.get("NS")).isEqualTo(2);
+    assertThat(row.get("NS")).isEqualTo(TEST_NS);
 
     // AF field should not be in the info row, should be moved to alt field
     assertThat(!row.containsKey("AF")).isTrue();
     assertThat(altMetadata.get(0).containsKey("AF")).isTrue();
-    assertThat(altMetadata.get(0).get("AF")).isEqualTo(0.333);
+    assertThat(altMetadata.get(0).get("AF")).isEqualTo(TEST_AF);
   }
 
   /**
@@ -169,63 +244,26 @@ public class VariantToBqUtilsTest {
    * and HQ will be [null, null]
    */
   @Test
-  public void testAddCalls_whenCheckingGenotypeElements_thenTrue() {
-    Genotype sample = mock(Genotype.class);
-    when(sample.getSampleName()).thenReturn("sample");
-    // mock genotypes
-    Map<String, Integer> alleleIndexingMap = new HashMap<>();
-    Allele firstAllele = mock(Allele.class);
-    when(firstAllele.getDisplayString()).thenReturn("G");
-    alleleIndexingMap.put("G", 1);
-    Allele secondAllele = mock(Allele.class);
-    when(secondAllele.getDisplayString()).thenReturn("A");
-    alleleIndexingMap.put("A", 2);
-    when(sample.getAlleles()).thenReturn(Arrays.asList(firstAllele, secondAllele));
-
-    // mock info
-    when(sample.hasAD()).thenReturn(false);
-    when(sample.hasDP()).thenReturn(true);
-    when(sample.getDP()).thenReturn(1);
-    when(sample.hasGQ()).thenReturn(false);
-    when(sample.hasPL()).thenReturn(false);
-    Map<String, Object> extendedAttributes = new HashMap<>();
-    extendedAttributes.put("HQ", "23,27");
-    extendedAttributes.put("PS", "0");
-    when(sample.getExtendedAttributes()).thenReturn(extendedAttributes);
-
-    // mock VCF header
-    VCFFormatHeaderLine DPMetadata = mock(VCFFormatHeaderLine.class);
-    when(vcfHeader.getFormatHeaderLine("DP")).thenReturn(DPMetadata);
-    when(DPMetadata.getType()).thenReturn(VCFHeaderLineType.Integer);
-    when(DPMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
-
-    VCFFormatHeaderLine HQMetadata = mock(VCFFormatHeaderLine.class);
-    when(vcfHeader.getFormatHeaderLine("HQ")).thenReturn(HQMetadata);
-    when(HQMetadata.getType()).thenReturn(VCFHeaderLineType.Integer);
-    when(HQMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
-
-    // add sample to genotypeContext
-    Iterator<Genotype> genotypeIterator = mock(Iterator.class);
-    when(genotypeIterator.hasNext()).thenReturn(true, false);
-    when(genotypeIterator.next()).thenReturn(sample);
-    when(genotypesContext.iterator()).thenReturn(genotypeIterator);
-
+  public void testAddCallsWithFieldValue_whenCheckingGenotypeElements_thenTrue() {
     // test table row fields
     List<TableRow> calls = VariantToBqUtils.addCalls(genotypesContext, vcfHeader,
             alleleIndexingMap);
     TableRow row = calls.get(0);
-    assertThat(row.get(CALLS_NAME)).isEqualTo("sample");
-    assertThat(row.get(CALLS_GENOTYPE)).isEqualTo(Arrays.asList(1, 2));
-    assertThat(row.get(CALLS_PHASESET)).isEqualTo("0");
+    assertThat(row.get(Constants.ColumnKeyConstants.CALLS_NAME)).isEqualTo("sample");
+    assertThat(row.get(Constants.ColumnKeyConstants.CALLS_GENOTYPE)).isEqualTo(Arrays.asList(1, 2));
+    assertThat(row.get(Constants.ColumnKeyConstants.CALLS_PHASESET)).isEqualTo("0");
     // PS should not be in the info map, should be set in phase set
     assertThat(!row.containsKey("PS")).isTrue();
-    assertThat(row.get("HQ")).isEqualTo(Arrays.asList(23,27));
+    assertThat(row.get("HQ")).isEqualTo(Arrays.asList(23, 27));
+  }
 
+  @Test
+  public void testAddCallsWithEmptyFields_whenCheckingGenotypeElements_thenTrue() {
     // Second record: contains empty fields
     // mock unknown genotypes
-    when(firstAllele.getDisplayString()).thenReturn(MISSING_FIELD_VALUE);
-    when(secondAllele.getDisplayString()).thenReturn(MISSING_FIELD_VALUE);
-    when(sample.getAlleles()).thenReturn(Arrays.asList(firstAllele, secondAllele));
+    when(firstGenotypeAllele.getDisplayString()).thenReturn(Constants.MISSING_FIELD_VALUE);
+    when(secondGenotypeAllele.getDisplayString()).thenReturn(Constants.MISSING_FIELD_VALUE);
+    when(sample.getAlleles()).thenReturn(Arrays.asList(firstGenotypeAllele, secondGenotypeAllele));
 
     // mock empty info fields
     extendedAttributes.remove("PS");
@@ -240,9 +278,12 @@ public class VariantToBqUtilsTest {
     List<TableRow> callsWithEmptyFields = VariantToBqUtils.addCalls(genotypesContext, vcfHeader,
             alleleIndexingMap);
     TableRow rowWithEmptyFields = callsWithEmptyFields.get(0);
-    assertThat(rowWithEmptyFields.get(CALLS_NAME)).isEqualTo("sample");
-    assertThat(rowWithEmptyFields.get(CALLS_GENOTYPE)).isEqualTo(Arrays.asList(-1, -1));
-    assertThat(rowWithEmptyFields.get(CALLS_PHASESET)).isEqualTo(DEFAULT_PHASESET);
+    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_NAME)).
+            isEqualTo(TEST_CALLS_NAME);
+    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_GENOTYPE)).
+            isEqualTo(Arrays.asList(DEFAULT_GENOTYPE, DEFAULT_GENOTYPE));
+    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_PHASESET)).
+            isEqualTo(Constants.DEFAULT_PHASESET);
     assertThat(rowWithEmptyFields.get("HQ")).isEqualTo(Arrays.asList(null,null));
   }
 }

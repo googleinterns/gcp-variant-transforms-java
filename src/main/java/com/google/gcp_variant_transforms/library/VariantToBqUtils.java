@@ -3,6 +3,7 @@
 package com.google.gcp_variant_transforms.library;
 
 import com.google.api.services.bigquery.model.TableRow;
+import com.google.gcp_variant_transforms.common.Constants;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.GenotypesContext;
@@ -13,47 +14,26 @@ import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * Utility constants and methods for write values with defined value type into Big Query rows.
+ * Utility methods for write values with defined value type into Big Query rows.
  */
 public class VariantToBqUtils {
-
-  private static final String MISSING_FIELD_VALUE = ".";
-  private static final String PHASESET_FORMAT_KEY = "PS";
-  private static final String DEFAULT_PHASESET = "*";
-  private static final int MISSING_GENOTYPE_VALUE = -1;
-
-  /**
-   * Constants for column names in the BigQuery schema.
-   */
-  public static class ColumnKeyConstants {
-    public static final String REFERENCE_NAME = "reference_name";
-    public static final String START_POSITION = "start_position";
-    public static final String END_POSITION = "end_position";
-    public static final String REFERENCE_BASES = "reference_bases";
-    public static final String ALTERNATE_BASES = "alternate_bases";
-    public static final String ALTERNATE_BASES_ALT = "alt";
-    public static final String NAMES = "names";
-    public static final String QUALITY = "quality";
-    public static final String FILTER = "filter";
-    public static final String CALLS = "call";
-    public static final String CALLS_NAME = "name";
-    public static final String CALLS_GENOTYPE = "genotype";
-    public static final String CALLS_PHASESET = "phaseset";
-  }
-
-  public static String buildReferenceBase(VariantContext variantContext) {
+  public static String addReferenceBase(VariantContext variantContext) {
     Allele referenceAllele = variantContext.getReference();
     // If the ref length is longer than 1, store the ref as a String
-    return dealWithMissingFieldValue(referenceAllele.getDisplayString());
+    String referenceBase = referenceAllele.getDisplayString();
+    return referenceBase.equals(Constants.MISSING_FIELD_VALUE) ? null : referenceBase;
   }
 
-  public static String buildNames(VariantContext variantContext) {
+  public static String addNames(VariantContext variantContext) {
     // If the ID field is ".", should write null into BQ row
-    return dealWithMissingFieldValue(variantContext.getID());
+    String name = variantContext.getID();
+    return name.equals(Constants.MISSING_FIELD_VALUE) ? null : name;
   }
 
   public static List<TableRow> addAlternates(VariantContext variantContext,
@@ -63,18 +43,27 @@ public class VariantToBqUtils {
     // if field value is '.', alternateAllelesList will be empty
     if (altAlleles.isEmpty()) {
       TableRow subRow = new TableRow();
-      subRow.set(ColumnKeyConstants.ALTERNATE_BASES_ALT, null);
+      subRow.set(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT, null);
       altMetadata.add(subRow);
     } else {
       for (int i = 0; i < altAlleles.size(); ++i) {
         TableRow subRow = new TableRow();
         String altBase = altAlleles.get(i).getDisplayString();
         alleleIndexingMap.put(altBase, i + 1);  // the alt allele index is 1-based
-        subRow.set(ColumnKeyConstants.ALTERNATE_BASES_ALT, altBase);
+        subRow.set(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT, altBase);
         altMetadata.add(subRow);
       }
     }
     return altMetadata;
+  }
+
+  public static Set<String> addFilters(VariantContext variantContext) {
+    Set<String> filters = variantContext.getFilters();
+    if (filters.isEmpty()) {
+      filters = new HashSet<>();
+      filters.add("PASS");
+    }
+    return filters;
   }
 
   /**
@@ -103,7 +92,7 @@ public class VariantToBqUtils {
     List<TableRow> callRows = new ArrayList<>();
     for (Genotype genotype : genotypes) {
       TableRow curRow = new TableRow();
-      curRow.set(ColumnKeyConstants.CALLS_NAME, genotype.getSampleName());
+      curRow.set(Constants.ColumnKeyConstants.CALLS_NAME, genotype.getSampleName());
       addInfoAndPhaseSet(curRow, genotype, vcfHeader);
       addGenotypes(curRow, genotype.getAlleles(), alleleIndexingMap);
       callRows.add(curRow);
@@ -119,8 +108,9 @@ public class VariantToBqUtils {
   public static Object convertToDefinedType(Object value, VCFHeaderLineType type) {
     if (!(value instanceof List)) {
       // deal with single value
-      // There are some field value is a single String with ',', eg: "HQ" ->"23,27"
-      // We need to convert it to list of String and call the convert function again
+      // There are some field values that contains ',' but have not been parsed by HTSJDK,
+      // eg: "HQ" ->"23,27"
+      // We need to convert it to list of String and call the convert function.
       if ((value instanceof String) && ((String)value).contains(",")) {
         String valueStr = (String)value;
         return convertToDefinedType(Arrays.asList(valueStr.split(",")), type);
@@ -136,6 +126,7 @@ public class VariantToBqUtils {
       return convertedList;
     }
   }
+
   /**
    * For a single value Object, convert to the type defined in the metadata
    */
@@ -148,7 +139,7 @@ public class VariantToBqUtils {
     String valueStr = (String)value;
     valueStr = valueStr.trim();   // for cases like " 27", ignore the space in list element
 
-    if (valueStr.equals(MISSING_FIELD_VALUE)) {
+    if (valueStr.equals(Constants.MISSING_FIELD_VALUE)) {
       return null;
     }
 
@@ -170,13 +161,13 @@ public class VariantToBqUtils {
     List<Integer> genotypes = new ArrayList<>();
     for (Allele allele : alleles) {
       String alleleStr = allele.getDisplayString();
-      if (alleleStr.equals(MISSING_FIELD_VALUE)) {
-        genotypes.add(-1);
+      if (alleleStr.equals(Constants.MISSING_FIELD_VALUE)) {
+        genotypes.add(Constants.MISSING_GENOTYPE_VALUE);
       } else {
-        genotypes.add(alleleIndexingMap.getOrDefault(alleleStr, -1));
+        genotypes.add(alleleIndexingMap.getOrDefault(alleleStr, Constants.MISSING_GENOTYPE_VALUE));
       }
     }
-    row.set(ColumnKeyConstants.CALLS_GENOTYPE, genotypes);
+    row.set(Constants.ColumnKeyConstants.CALLS_GENOTYPE, genotypes);
   }
 
   private static void addInfoAndPhaseSet(TableRow row, Genotype genotype, VCFHeader vcfHeader) {
@@ -188,9 +179,9 @@ public class VariantToBqUtils {
     if (genotype.hasPL()) { row.set("PL", genotype.getPL()); }
     Map<String, Object> extendedAttributes = genotype.getExtendedAttributes();
     for (String extendedAttr : extendedAttributes.keySet()) {
-      if (extendedAttr.equals(PHASESET_FORMAT_KEY)) {
-        String phaseSetValue = extendedAttributes.get(PHASESET_FORMAT_KEY).toString();
-        phaseSet = dealWithMissingFieldValue(phaseSetValue);
+      if (extendedAttr.equals(Constants.PHASESET_FORMAT_KEY)) {
+        String phaseSetValue = extendedAttributes.get(Constants.PHASESET_FORMAT_KEY).toString();
+        phaseSet = phaseSetValue.equals(Constants.MISSING_FIELD_VALUE) ? null : phaseSetValue;
       } else {
         // The rest of fields need to be converted to the right type by VCFCodec decode function
         row.set(extendedAttr, convertToDefinedType(extendedAttributes.get(extendedAttr),
@@ -199,18 +190,10 @@ public class VariantToBqUtils {
     }
     if (phaseSet == null || phaseSet.length() != 0) {
       // phaseSet is presented(MISSING_FIELD_VALUE('.') or real value)
-      row.set(ColumnKeyConstants.CALLS_PHASESET, phaseSet);
+      row.set(Constants.ColumnKeyConstants.CALLS_PHASESET, phaseSet);
     } else {
-      row.set(ColumnKeyConstants.CALLS_PHASESET, DEFAULT_PHASESET);
+      row.set(Constants.ColumnKeyConstants.CALLS_PHASESET, Constants.DEFAULT_PHASESET);
     }
-  }
-
-
-  /**
-   * In some fields that values are MISSING_FIELD_VALUE('.'), should set null in BQ row.
-   */
-  private static String dealWithMissingFieldValue(String value) {
-    return value.equals(MISSING_FIELD_VALUE) ? null : value;
   }
 
   private static void splitAlternateAlleleInfoFields(String attrName, Object value,
@@ -228,7 +211,7 @@ public class VariantToBqUtils {
         if (i >= altMetadata.size()) {
           // should add more sub rows in alt field
           altMetadata.add(new TableRow());
-          altMetadata.get(i).set(ColumnKeyConstants.ALTERNATE_BASES_ALT, null);
+          altMetadata.get(i).set(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT, null);
         }
         // set attr into alt field
         altMetadata.get(i).set(attrName, convertSingleObjectToDefinedType(valList.get(i), type));
