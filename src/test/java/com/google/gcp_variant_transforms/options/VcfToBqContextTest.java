@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.Schema;
+import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.common.collect.ImmutableList;
 import htsjdk.variant.vcf.VCFHeader;
 import java.io.IOException;
@@ -139,8 +141,9 @@ public class VcfToBqContextTest {
  
    @Test
    public void testVcfContext_whenSetBqSchema_thenIsEqualTo() throws IOException {
-      VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
-      Schema schema = mock(Schema.class);
+      VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);
+      Field sampleField = Field.newBuilder("sample name", StandardSQLTypeName.INT64).build();
+      Schema schema = Schema.of(sampleField);
       vcfToBqContext.setBqSchema(schema);
    
       assertThat(vcfToBqContext.getBqSchema()).isEqualTo(schema);
