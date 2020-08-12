@@ -2,11 +2,11 @@
 
 package com.google.gcp_variant_transforms.options;
 
+import com.google.api.services.bigquery.model.TableSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.task.VcfToBqTask;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.api.services.bigquery.model.TableSchema;
 import htsjdk.variant.vcf.VCFHeader;
 import org.apache.beam.sdk.options.PipelineOptions;
 import java.io.IOException;

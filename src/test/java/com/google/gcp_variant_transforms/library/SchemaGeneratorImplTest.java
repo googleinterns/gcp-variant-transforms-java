@@ -17,8 +17,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import javax.xml.validation.Schema;
-
 /**
  * Units tests for SchemaGeneratorImpl.java
  */
