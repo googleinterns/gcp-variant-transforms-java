@@ -15,30 +15,6 @@ import htsjdk.variant.vcf.VCFHeader;
  * Service to create BigQuery Schema from VCFHeader 
  */
 public class SchemaGeneratorImpl implements SchemaGenerator {
-
-  public static class FieldDescriptionConstants {
-    public static final String REFERENCE_NAME = "Reference name.";
-    public static final String START_POSITION = "Start position. Corresponds to the first " +
-                                                "base of the string of reference bases.";
-    public static final String END_POSITION = "End position. Corresponds to the first base " +
-                                              "after the last base in the reference allele.";
-    public static final String REFERENCE_BASES = "Reference bases.";
-    public static final String NAMES = "Variant names (e.g. RefSNP ID).";
-    public static final String QUALITY = "Phred-scaled quality score (-10log10 prob(call " +
-                                         "is wrong)). Higher values imply better quality.";
-    public static final String FILTER = "List of failed filters (if any) or \"PASS\" " +
-                                        "indicating the variant has passed all filters.";
-    public static final String CALLS = "One record for each call.";
-    public static final String CALLS_SAMPLE_ID = "Unique ID (type INT64) assigned to each " +
-                                                 "sample. Table with `__sample_info` suffix " +
-                                                 "contains the mapping of sample names (as read" +
-                                                 "from VCF header) to these assigned IDs.";
-    public static final String CALLS_GENOTYPE = "Genotype of the call. \"-1\" is used in cases " +
-                                                "where the genotype is not called.";
-    public static final String CALLS_PHASESET = "Phaseset of the call (if any). \"*\" is used " +
-                                                "in cases where the genotype is phased, but no " +
-                                                "phase set (\"PS\" in FORMAT) was specified.";
-  }
   
   public Schema getSchema(VCFHeader vcfHeader){
     ImmutableList<Field> schemaFields = getFields(vcfHeader);
