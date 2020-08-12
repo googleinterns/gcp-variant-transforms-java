@@ -2,7 +2,7 @@
 
 package com.google.gcp_variant_transforms.library;
 
-import com.google.cloud.bigquery.Schema;
+import com.google.api.services.bigquery.model.TableSchema;
 import htsjdk.variant.vcf.VCFHeader;
 
 /**
@@ -10,5 +10,5 @@ import htsjdk.variant.vcf.VCFHeader;
  */
 public interface SchemaGenerator {
 
-  public Schema getSchema(VCFHeader vcfHeader);
+  public TableSchema getSchema(VCFHeader vcfHeader);
 }

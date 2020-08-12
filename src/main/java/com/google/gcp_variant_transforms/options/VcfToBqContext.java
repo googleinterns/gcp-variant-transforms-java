@@ -2,11 +2,11 @@
 
 package com.google.gcp_variant_transforms.options;
 
-import com.google.cloud.bigquery.Schema;
 import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.task.VcfToBqTask;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.api.services.bigquery.model.TableSchema;
 import htsjdk.variant.vcf.VCFHeader;
 import org.apache.beam.sdk.options.PipelineOptions;
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class VcfToBqContext extends AbstractContext {
   private final String output;
   private ImmutableList<String> headerLines = null;
   private VCFHeader vcfHeader = null;
-  private Schema bqSchema = null; 
+  private TableSchema bqSchema = null;
 
   @Inject
   public VcfToBqContext(VcfToBqOptions options) throws IOException {
@@ -61,11 +61,11 @@ public class VcfToBqContext extends AbstractContext {
     this.vcfHeader = vcfHeader;
   }
 
-  public Schema getBqSchema(){
+  public TableSchema getBqSchema(){
     return bqSchema;
   }
 
-  public void setBqSchema(Schema schema){
+  public void setBqSchema(TableSchema schema){
     this.bqSchema = schema; 
   }
 }
