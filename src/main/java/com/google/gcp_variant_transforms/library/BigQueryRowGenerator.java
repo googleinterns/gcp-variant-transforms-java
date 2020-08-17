@@ -7,12 +7,10 @@ import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFHeader;
 
 /**
- * Service to generate Big Query Row from VariantContext
+ * Service to generate Big Query Row from VariantContext. It provides functionalities when
+ * generating BigQuery row.
  */
 public interface BigQueryRowGenerator {
-  /**
-   * BigQuery row generator. It provides the common functionalities when generating BigQuery
-   * row (e.g., sanitizing the BigQuery field, resolving the conflicts between the schema and data).
-   */
-  public TableRow getRows(VariantContext variantContext, VCFHeader vcfHeader);
+
+  public TableRow convertToBQRow(VariantContext variantContext, VCFHeader vcfHeader);
 }

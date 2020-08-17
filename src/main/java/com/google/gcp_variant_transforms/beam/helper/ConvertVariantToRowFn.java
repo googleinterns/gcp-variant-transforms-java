@@ -22,6 +22,6 @@ public class ConvertVariantToRowFn extends DoFn<VariantContext, TableRow> {
 
   @ProcessElement
   public void processElement(@Element VariantContext variantContext, OutputReceiver<TableRow> receiver) {
-    receiver.output(bigQueryRowGenerator.getRows(variantContext, vcfHeader));
+    receiver.output(bigQueryRowGenerator.convertToBQRow(variantContext, vcfHeader));
   }
 }

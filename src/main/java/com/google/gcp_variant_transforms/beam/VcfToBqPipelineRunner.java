@@ -41,24 +41,22 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
   public void runPipeline() {
     // Demo code.
     Pipeline pipeline = Pipeline.create(options);
-    PCollection<VariantContext> variantContextPCollection =
-            pipeline.apply(TextIO.read().from(context.getInputFile()))
-      .apply(Filter.by((String inputLine) -> !inputLine.startsWith("#")))
-      .apply(ParDo.of(new ConvertLineToVariantFn(vcfParser, context.getHeaderLines())));
+    PCollection<VariantContext> variantContextPCollection = pipeline
+        .apply(TextIO.read().from(context.getInputFile()))
+        .apply(Filter.by((String inputLine) -> !inputLine.startsWith("#")))
+        .apply(ParDo.of(new ConvertLineToVariantFn(vcfParser, context.getHeaderLines())));
 
     PCollection<TableRow> tableRowPCollection = variantContextPCollection
-            .apply("VariantContextToBQRow",
-                    ParDo.of(new ConvertVariantToRowFn(bigQueryRowGenerator,
-                            context.getVCFHeader())));
+        .apply("VariantContextToBQRow",
+            ParDo.of(new ConvertVariantToRowFn(bigQueryRowGenerator,
+                context.getVCFHeader())));
 
-    variantContextPCollection.apply(
-          MapElements
-              .into(TypeDescriptors.strings())
-              .via(
-                  (VariantContext variant) ->
-                  String.format("Contig: %s; Start: %d; End: %d",
-                      variant.getContig(), variant.getStart(), variant.getEnd())))
-      .apply(TextIO.write().to(context.getOutput()).withNoSpilling());
+    tableRowPCollection
+        .apply(MapElements
+            .into(TypeDescriptors.strings())
+                .via(
+                    (TableRow tableRow) -> tableRow.toString()))
+        .apply(TextIO.write().to(context.getOutput()).withNoSpilling());
     pipeline.run().waitUntilFinish();
   }
 }

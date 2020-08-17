@@ -3,6 +3,8 @@
 package com.google.gcp_variant_transforms.task;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gcp_variant_transforms.library.BigQueryRowGenerator;
+import com.google.gcp_variant_transforms.library.BigQueryRowGeneratorImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Provides;
@@ -55,6 +57,7 @@ public class VcfToBqModule extends AbstractModule {
     install(new LibraryModule());
     bind(Task.class).to(VcfToBqTask.class);
     bind(PipelineRunner.class).to(VcfToBqPipelineRunner.class);
+    bind(BigQueryRowGenerator.class).to(BigQueryRowGeneratorImpl.class);
     bind(new TypeLiteral<ImmutableList<String>>() {})
         .annotatedWith(Args.class)
         .toInstance(this.args);
