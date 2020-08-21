@@ -50,13 +50,13 @@ public class SchemaUtils {
         "phase set (\"PS\" in FORMAT) was specified.";
   }
 
-  public static class FieldMode {
+  public static class BQFieldMode {
     public static final String NULLABLE = "NULLABLE";
     public static final String REQUIRED = "REQUIRED";
     public static final String REPEATED = "REPEATED";
   }
 
-  public static class FieldType {
+  public static class BQFieldType {
     // This list of types is not exhaustive; other possible TableFieldSchema types exist.
     public static final String INTEGER = "INT64"; // Same as "INTEGER"
     public static final String FLOAT = "FLOAT64"; // Same as "FLOAT"
@@ -64,6 +64,25 @@ public class SchemaUtils {
     public static final String RECORD = "RECORD"; // Same as "STRUCT"
     public static final String STRING = "STRING";
   }
+
+  // Maps a constant Field index to its name with a TreeMap, ordered by field index.
+  public static Map<Integer, String> constantFieldIndexToNameMap = new TreeMap<Integer, String>() {{
+    put(FieldIndex.REFERENCE_NAME, Constants.ColumnKeyNames.REFERENCE_NAME);
+    put(FieldIndex.START_POSITION, Constants.ColumnKeyNames.START_POSITION);
+    put(FieldIndex.END_POSITION, Constants.ColumnKeyNames.END_POSITION);
+    put(FieldIndex.REFERENCE_BASES, Constants.ColumnKeyNames.REFERENCE_BASES);
+    put(FieldIndex.NAMES, Constants.ColumnKeyNames.NAMES);
+    put(FieldIndex.QUALITY, Constants.ColumnKeyNames.QUALITY);
+    put(FieldIndex.FILTER, Constants.ColumnKeyNames.FILTER);
+    put(FieldIndex.CALLS, Constants.ColumnKeyNames.CALLS);
+  }};
+
+  // Maps a Call Sub-Field index to its name with a TreeMap, ordered by field index.
+  public static Map<Integer, String> callsSubFieldIndexToNameMap = new TreeMap<Integer, String>() {{
+    put(FieldIndex.CALLS_SAMPLE_NAME, Constants.ColumnKeyNames.CALLS_SAMPLE_NAME);
+    put(FieldIndex.CALLS_GENOTYPE, Constants.ColumnKeyNames.CALLS_GENOTYPE);
+    put(FieldIndex.CALLS_PHASESET, Constants.ColumnKeyNames.CALLS_PHASESET);
+  }};
 
   // Maps a constant Field name to its description.
   public static Map<String, String> constantFieldNameToDescriptionMap = Stream.of(new String[][]{
@@ -77,67 +96,49 @@ public class SchemaUtils {
       {Constants.ColumnKeyNames.CALLS, FieldDescription.CALLS},
       }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
 
-  // Maps a constant Field name to its mode.
-  public static Map<String, String> constantFieldNameToModeMap = Stream.of(new String[][]{
-      {Constants.ColumnKeyNames.REFERENCE_NAME, FieldMode.NULLABLE},
-      {Constants.ColumnKeyNames.START_POSITION, FieldMode.NULLABLE},
-      {Constants.ColumnKeyNames.END_POSITION, FieldMode.NULLABLE},
-      {Constants.ColumnKeyNames.REFERENCE_BASES, FieldMode.NULLABLE},
-      {Constants.ColumnKeyNames.NAMES, FieldMode.REPEATED},
-      {Constants.ColumnKeyNames.QUALITY, FieldMode.NULLABLE},
-      {Constants.ColumnKeyNames.FILTER, FieldMode.REPEATED},
-      {Constants.ColumnKeyNames.CALLS, FieldMode.REPEATED},
-      }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
-
-  // Maps a constant Field name to its type.
-  public static Map<String, String> constantFieldNameToTypeMap = Stream.of(new String[][]{
-      {Constants.ColumnKeyNames.REFERENCE_NAME, FieldType.STRING},
-      {Constants.ColumnKeyNames.START_POSITION, FieldType.INTEGER},
-      {Constants.ColumnKeyNames.END_POSITION, FieldType.INTEGER},
-      {Constants.ColumnKeyNames.REFERENCE_BASES, FieldType.STRING},
-      {Constants.ColumnKeyNames.NAMES, FieldType.STRING},
-      {Constants.ColumnKeyNames.QUALITY, FieldType.FLOAT},
-      {Constants.ColumnKeyNames.FILTER, FieldType.STRING},
-      {Constants.ColumnKeyNames.CALLS, FieldType.RECORD},
-      }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
-
-  // Maps a Call sub-field to its type.
-  public static Map<String, String> callSubFieldNameToTypeMap = Stream.of(new String[][]{
-      {Constants.ColumnKeyNames.CALLS_PHASESET, FieldType.STRING},
-      {Constants.ColumnKeyNames.CALLS_GENOTYPE, FieldType.INTEGER},
-      {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, FieldType.STRING}, //verify
-      }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
-
-  // Maps a Call sub-fields to its mode.
-  public static Map<String, String> callSubFieldNameToModeMap = Stream.of(new String[][]{
-      {Constants.ColumnKeyNames.CALLS_PHASESET, FieldMode.NULLABLE},
-      {Constants.ColumnKeyNames.CALLS_GENOTYPE, FieldMode.REPEATED},
-      {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, FieldMode.NULLABLE},
-      }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
-
-  // Maps a Call sub-fields to its description.
+  // Maps a Call sub-field to its description.
   public static Map<String, String> callSubFieldNameToDescriptionMap = Stream.of(new String[][]{
       {Constants.ColumnKeyNames.CALLS_PHASESET, FieldDescription.CALLS_PHASESET},
       {Constants.ColumnKeyNames.CALLS_GENOTYPE, FieldDescription.CALLS_GENOTYPE},
       {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, FieldDescription.CALLS_SAMPLE_NAME},
+  }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
+
+  // Maps a constant Field name to its mode.
+  public static Map<String, String> constantFieldNameToModeMap = Stream.of(new String[][]{
+      {Constants.ColumnKeyNames.REFERENCE_NAME, BQFieldMode.NULLABLE},
+      {Constants.ColumnKeyNames.START_POSITION, BQFieldMode.NULLABLE},
+      {Constants.ColumnKeyNames.END_POSITION, BQFieldMode.NULLABLE},
+      {Constants.ColumnKeyNames.REFERENCE_BASES, BQFieldMode.NULLABLE},
+      {Constants.ColumnKeyNames.NAMES, BQFieldMode.REPEATED},
+      {Constants.ColumnKeyNames.QUALITY, BQFieldMode.NULLABLE},
+      {Constants.ColumnKeyNames.FILTER, BQFieldMode.REPEATED},
+      {Constants.ColumnKeyNames.CALLS, BQFieldMode.REPEATED},
       }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
 
-  // Maps a constant Field index to its name with a TreeMap, ordered by field index.
-  public static Map<Integer, String> constantFieldIndexToNameMap = new TreeMap<Integer, String>() {{
-      put(FieldIndex.REFERENCE_NAME, Constants.ColumnKeyNames.REFERENCE_NAME);
-      put(FieldIndex.START_POSITION, Constants.ColumnKeyNames.START_POSITION);
-      put(FieldIndex.END_POSITION, Constants.ColumnKeyNames.END_POSITION);
-      put(FieldIndex.REFERENCE_BASES, Constants.ColumnKeyNames.REFERENCE_BASES);
-      put(FieldIndex.NAMES, Constants.ColumnKeyNames.NAMES);
-      put(FieldIndex.QUALITY, Constants.ColumnKeyNames.QUALITY);
-      put(FieldIndex.FILTER, Constants.ColumnKeyNames.FILTER);
-      put(FieldIndex.CALLS, Constants.ColumnKeyNames.CALLS);
-      }};
+  // Maps a Call sub-fields to its mode.
+  public static Map<String, String> callSubFieldNameToModeMap = Stream.of(new String[][]{
+      {Constants.ColumnKeyNames.CALLS_PHASESET, BQFieldMode.NULLABLE},
+      {Constants.ColumnKeyNames.CALLS_GENOTYPE, BQFieldMode.REPEATED},
+      {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, BQFieldMode.NULLABLE},
+  }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
 
-  // Maps a Call Sub-Field index to its name with a TreeMap, ordered by field index.
-  public static Map<Integer, String> callsSubFieldIndexToNameMap = new TreeMap<Integer, String>() {{
-      put(FieldIndex.CALLS_SAMPLE_NAME, Constants.ColumnKeyNames.CALLS_SAMPLE_NAME);
-      put(FieldIndex.CALLS_GENOTYPE, Constants.ColumnKeyNames.CALLS_GENOTYPE);
-      put(FieldIndex.CALLS_PHASESET, Constants.ColumnKeyNames.CALLS_PHASESET);
-      }};
+  // Maps a constant Field name to its type.
+  public static Map<String, String> constantFieldNameToTypeMap = Stream.of(new String[][]{
+      {Constants.ColumnKeyNames.REFERENCE_NAME, BQFieldType.STRING},
+      {Constants.ColumnKeyNames.START_POSITION, BQFieldType.INTEGER},
+      {Constants.ColumnKeyNames.END_POSITION, BQFieldType.INTEGER},
+      {Constants.ColumnKeyNames.REFERENCE_BASES, BQFieldType.STRING},
+      {Constants.ColumnKeyNames.NAMES, BQFieldType.STRING},
+      {Constants.ColumnKeyNames.QUALITY, BQFieldType.FLOAT},
+      {Constants.ColumnKeyNames.FILTER, BQFieldType.STRING},
+      {Constants.ColumnKeyNames.CALLS, BQFieldType.RECORD},
+      }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
+
+  // Maps a Call sub-field to its type.
+  public static Map<String, String> callSubFieldNameToTypeMap = Stream.of(new String[][]{
+      {Constants.ColumnKeyNames.CALLS_PHASESET, BQFieldType.STRING},
+      {Constants.ColumnKeyNames.CALLS_GENOTYPE, BQFieldType.INTEGER},
+      {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, BQFieldType.STRING}, //verify
+      }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
+
 }
