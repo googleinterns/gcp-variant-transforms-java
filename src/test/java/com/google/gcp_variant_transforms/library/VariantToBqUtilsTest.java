@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Units tests for VariantToBqUtilsImpl.java
  */
@@ -136,55 +135,52 @@ public class VariantToBqUtilsTest {
     when(variantContext.getGenotypes()).thenReturn(genotypesContext);
   }
 
-
   @Test
   public void testConvertStringValueToRightValueType_whenComparingElement_thenTrue() {
     // Test list of values.
     int count = 2;
     String integerListStr = "23,27";
-    assertThat(variantToBqUtils.convertToDefinedType(integerListStr,
-            VCFHeaderLineType.Integer, count))
-            .isEqualTo(Arrays.asList(23, 27));
+    assertThat(variantToBqUtils.convertToDefinedType(integerListStr, VCFHeaderLineType.Integer,
+        count)).isEqualTo(Arrays.asList(23, 27));
     String floatListStr = "0.333,0.667";
     assertThat(variantToBqUtils.convertToDefinedType(floatListStr, VCFHeaderLineType.Float, count))
-            .isEqualTo(Arrays.asList(0.333, 0.667));
+        .isEqualTo(Arrays.asList(0.333, 0.667));
 
     // Test single values.
     count = 1;
     // Test int values.
     String integerStr = "23";
     assertThat(variantToBqUtils.convertToDefinedType(integerStr,
-            VCFHeaderLineType.Integer, count))
-            .isEqualTo(23);
+        VCFHeaderLineType.Integer, count)).isEqualTo(23);
 
     // Test float values.
     String floatStr = "0.333";
     assertThat(variantToBqUtils.convertToDefinedType(floatStr, VCFHeaderLineType.Float, count))
-            .isEqualTo(0.333);
+        .isEqualTo(0.333);
 
     // If input value is integer but type is float, it should be able to cast to float value.
     floatStr = "1";
     assertThat(variantToBqUtils.convertToDefinedType(floatStr, VCFHeaderLineType.Float, count))
-            .isEqualTo(1.0);
+        .isEqualTo(1.0);
 
     // Test String values.
     String str = "T";
     assertThat(variantToBqUtils.convertToDefinedType(str, VCFHeaderLineType.String, count))
-            .isEqualTo("T");
+        .isEqualTo("T");
 
     // Test value count does not match the number in the VCFHeader which will raise an exception
     int invalidCount = 2;
     Exception countNotMatchException = assertThrows(IndexOutOfBoundsException.class, () ->
-            variantToBqUtils.convertToDefinedType(str, VCFHeaderLineType.String, invalidCount));
+        variantToBqUtils.convertToDefinedType(str, VCFHeaderLineType.String, invalidCount));
     assertThat(countNotMatchException).hasMessageThat().contains("Value count does not match the " +
-            "count defined by VCFHeader");
+        "count defined by VCFHeader");
 
     // Test value type does not match the type in the VCFHeader which will raise an exception
     String invalidFloatStr = "1.5";
     int validCount = 1;
     Exception numberFormatException = assertThrows(NumberFormatException.class, () ->
-            variantToBqUtils.convertToDefinedType(invalidFloatStr,
-                    VCFHeaderLineType.Integer, validCount));
+        variantToBqUtils.convertToDefinedType(invalidFloatStr, VCFHeaderLineType.Integer,
+            validCount));
     assertThat(numberFormatException).hasMessageThat().contains("For input string");
   }
 
@@ -217,13 +213,13 @@ public class VariantToBqUtilsTest {
     when(variantContext.getAlternateAlleles()).thenReturn(alternateList);
     List<TableRow> missingFieldTableRow = variantToBqUtils.getAlternateBases(variantContext);
     assertThat(missingFieldTableRow.get(0)
-            .get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isNull();
+        .get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isNull();
 
     // Test alt field has value "T".
     alternateList.add(altAllele);
     List<TableRow> altFieldTableRow = variantToBqUtils.getAlternateBases(variantContext);
     assertThat(altFieldTableRow.get(0)
-            .get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isEqualTo("T");
+        .get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isEqualTo("T");
   }
 
   @Test
@@ -317,11 +313,11 @@ public class VariantToBqUtilsTest {
     List<TableRow> callsWithEmptyFields = variantToBqUtils.addCalls(variantContext, vcfHeader);
     TableRow rowWithEmptyFields = callsWithEmptyFields.get(0);
     assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_NAME))
-            .isEqualTo(TEST_CALLS_NAME);
+        .isEqualTo(TEST_CALLS_NAME);
     assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_GENOTYPE))
-            .isEqualTo(Arrays.asList(DEFAULT_GENOTYPE, DEFAULT_GENOTYPE));
+        .isEqualTo(Arrays.asList(DEFAULT_GENOTYPE, DEFAULT_GENOTYPE));
     assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_PHASESET))
-            .isEqualTo(Constants.DEFAULT_PHASESET);
+        .isEqualTo(Constants.DEFAULT_PHASESET);
     assertThat(rowWithEmptyFields.get("HQ")).isEqualTo(Arrays.asList(null,null));
   }
 }
