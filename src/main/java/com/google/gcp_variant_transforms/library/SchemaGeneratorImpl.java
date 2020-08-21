@@ -5,11 +5,9 @@ package com.google.gcp_variant_transforms.library;
 import com.google.api.services.bigquery.model.TableFieldSchema;
 import com.google.api.services.bigquery.model.TableSchema;
 import com.google.common.collect.ImmutableList;
+import com.google.gcp_variant_transforms.common.Constants;
 import htsjdk.variant.vcf.VCFHeader;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.Collection;
 
 /**
  * Service to create BigQuery Schema from VCFHeader 
@@ -23,14 +21,19 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
     return schema;
   }
 
+  /**
+   * Builds and returns a list of fields to create table schema.
+   * @param vcfHeader
+   * @return ImmutableList<TableFieldSchema>
+   */
   public ImmutableList<TableFieldSchema> getFields(VCFHeader vcfHeader){
     ImmutableList.Builder<TableFieldSchema> fields = new ImmutableList.Builder<TableFieldSchema>();
-    Integer[] fieldIndices = getFieldIndices(SchemaUtils.constantFieldIndexToNameMap);
+    Collection<String> fieldNames = SchemaUtils.constantFieldIndexToNameMap.values();
 
-    for (Integer fieldIndex : fieldIndices){
-      String fieldName = SchemaUtils.constantFieldIndexToNameMap.get(fieldIndex);
+    for (String fieldName : fieldNames){
       TableFieldSchema field;
-      if( fieldName == SchemaUtils.FieldName.CALLS){ // requires generating sub-fields
+      // Creating a Call record requires generating its sub-fields.
+      if( fieldName == Constants.ColumnKeyNames.CALLS){
         ImmutableList<TableFieldSchema> callsSubFields = createCallSubFields();
         field = new TableFieldSchema()
             .setName(fieldName)
@@ -55,11 +58,14 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
     return fields.build();
   }
 
+  /**
+   * Retrieves Call record's subfields.
+   * @return ImmutableList<TableFieldSchema>
+   */
   public ImmutableList<TableFieldSchema> createCallSubFields(){
     ImmutableList.Builder<TableFieldSchema> callSubFieldsBuilder = new ImmutableList.Builder<TableFieldSchema>();
-    Integer[] fieldIndices = getFieldIndices(SchemaUtils.callsSubFieldIndexToNameMap);
-    for (Integer fieldIndex : fieldIndices){
-      String fieldName = SchemaUtils.callsSubFieldIndexToNameMap.get(fieldIndex);
+    Collection<String> fieldNames = SchemaUtils.callsSubFieldIndexToNameMap.values();
+    for (String fieldName : fieldNames){
       TableFieldSchema callSubField = new TableFieldSchema()
             .setName(fieldName)
             .setMode(SchemaUtils.callSubFieldNameToModeMap.get(fieldName))
@@ -68,14 +74,5 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
       callSubFieldsBuilder.add(callSubField);
     }
     return callSubFieldsBuilder.build();
-  }
-
-  // Retrieves field indices for a specific field list
-  // i.e. calls fields or constant fields
-  public Integer[] getFieldIndices(Map<Integer, String> indexToNameMap){
-    Integer[] fieldIndices = indexToNameMap.keySet()
-        .toArray(new Integer[indexToNameMap.size()]);
-    Arrays.sort(fieldIndices);
-    return fieldIndices;
   }
 }

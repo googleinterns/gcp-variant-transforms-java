@@ -8,8 +8,9 @@ import static org.mockito.Mockito.mock;
 import com.google.api.services.bigquery.model.TableFieldSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.UnmodifiableListIterator;
-import com.google.guiceberry.junit4.GuiceBerryRule;
 import com.google.gcp_variant_transforms.TestEnv;
+import com.google.gcp_variant_transforms.common.Constants;
+import com.google.guiceberry.junit4.GuiceBerryRule;
 import com.google.inject.Inject;
 import htsjdk.variant.vcf.VCFHeader;
 import java.util.List;
@@ -33,7 +34,7 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: reference field
+  // Column: reference field
   public void testGetFields_whenGetReferenceField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
@@ -41,7 +42,7 @@ public class SchemaGeneratorImplTest {
     TableFieldSchema referenceField = fieldIterator.next();
 
     assertThat(referenceField.getName())
-        .isEqualTo(SchemaUtils.FieldName.REFERENCE_NAME);
+        .isEqualTo(Constants.ColumnKeyNames.REFERENCE_NAME);
     assertThat(referenceField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.REFERENCE_NAME);
     assertThat(referenceField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
@@ -49,7 +50,7 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: start position
+  // Column: start position
   public void testGetFields_whenGetStartPosField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
@@ -57,7 +58,7 @@ public class SchemaGeneratorImplTest {
     TableFieldSchema startPosField = fieldIterator.next();
 
     assertThat(startPosField.getName())
-        .isEqualTo(SchemaUtils.FieldName.START_POSITION);
+        .isEqualTo(Constants.ColumnKeyNames.START_POSITION);
     assertThat(startPosField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.START_POSITION);
     assertThat(startPosField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
@@ -65,7 +66,7 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: end position
+  // Column: end position
   public void testGetFields_whenGetEndPosField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
@@ -73,7 +74,7 @@ public class SchemaGeneratorImplTest {
     TableFieldSchema endPosField = fieldIterator.next();
 
     assertThat(endPosField.getName())
-        .isEqualTo(VariantToBqUtils.ColumnKeyConstants.END_POSITION);
+        .isEqualTo(Constants.ColumnKeyNames.END_POSITION);
     assertThat(endPosField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.END_POSITION);
     assertThat(endPosField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
@@ -81,7 +82,7 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: reference bases
+  // Column: reference bases
   public void testGetFields_whenGetReferenceBasesField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
@@ -89,7 +90,7 @@ public class SchemaGeneratorImplTest {
     TableFieldSchema referenceBasesField = fieldIterator.next();
 
     assertThat(referenceBasesField.getName())
-        .isEqualTo(SchemaUtils.FieldName.REFERENCE_BASES);
+        .isEqualTo(Constants.ColumnKeyNames.REFERENCE_BASES);
     assertThat(referenceBasesField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.REFERENCE_BASES);
     assertThat(referenceBasesField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
@@ -97,7 +98,7 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: names
+  // Column: names
   public void testGetFields_whenGetNamesField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
@@ -105,7 +106,7 @@ public class SchemaGeneratorImplTest {
     TableFieldSchema namesField = fieldIterator.next();
 
     assertThat(namesField.getName())
-        .isEqualTo(SchemaUtils.FieldName.NAMES);
+        .isEqualTo(Constants.ColumnKeyNames.NAMES);
     assertThat(namesField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.NAMES);
     assertThat(namesField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
@@ -113,7 +114,7 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: quality
+  // Column: quality
   public void testGetFields_whenGetQualityField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
@@ -121,7 +122,7 @@ public class SchemaGeneratorImplTest {
     TableFieldSchema qualityField = fieldIterator.next();
 
     assertThat(qualityField.getName())
-        .isEqualTo(SchemaUtils.FieldName.QUALITY);
+        .isEqualTo(Constants.ColumnKeyNames.QUALITY);
     assertThat(qualityField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.QUALITY);
     assertThat(qualityField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
@@ -129,7 +130,7 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: filter
+  // Column: filter
   public void testGetFields_whenGetFilterField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
@@ -137,7 +138,7 @@ public class SchemaGeneratorImplTest {
     TableFieldSchema filterField = fieldIterator.next();
 
     assertThat(filterField.getName())
-        .isEqualTo(SchemaUtils.FieldName.FILTER);
+        .isEqualTo(Constants.ColumnKeyNames.FILTER);
     assertThat(filterField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.FILTER);
     assertThat(filterField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
@@ -145,7 +146,7 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: calls record
+  // Column: calls record
   public void testGetFields_whenGetCallsField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
@@ -153,7 +154,7 @@ public class SchemaGeneratorImplTest {
     TableFieldSchema callsField = fieldIterator.next();
 
     assertThat(callsField.getName())
-        .isEqualTo(SchemaUtils.FieldName.CALLS);
+        .isEqualTo(Constants.ColumnKeyNames.CALLS);
     assertThat(callsField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS);
     assertThat(callsField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
@@ -161,9 +162,9 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: calls record's subfields
-  // verifies that the call record's sub-Fields maintain data integrity 
-  // after they are added to the call record in a FieldList 
+  // Columns: calls record's subfields
+  // Verifies that the call record's sub-Fields maintain data integrity
+  // after they are added to the call record in a FieldList.
   public void testGetFields_whenGetCallsSubFields_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
@@ -177,22 +178,25 @@ public class SchemaGeneratorImplTest {
     TableFieldSchema callsPhasesetField = callSubFields
         .get(SchemaUtils.FieldIndex.CALLS_PHASESET);
 
+    // Call Sample Name asserts
     assertThat(callsSampleNameField.getName())
-        .isEqualTo(SchemaUtils.FieldName.CALLS_SAMPLE_NAME);
+        .isEqualTo(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME);
     assertThat(callsSampleNameField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_SAMPLE_NAME);
     assertThat(callsSampleNameField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
     assertThat(callsSampleNameField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
-    
+
+    // Call Genotype asserts
     assertThat(callsGenotypeField.getName())
-        .isEqualTo(SchemaUtils.FieldName.CALLS_GENOTYPE);
+        .isEqualTo(Constants.ColumnKeyNames.CALLS_GENOTYPE);
     assertThat(callsGenotypeField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_GENOTYPE);
     assertThat(callsGenotypeField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
     assertThat(callsGenotypeField.getType()).isEqualTo(SchemaUtils.FieldType.INTEGER);
 
+    // Call Phaseset asserts
     assertThat(callsPhasesetField.getName())
-        .isEqualTo(SchemaUtils.FieldName.CALLS_PHASESET);
+        .isEqualTo(Constants.ColumnKeyNames.CALLS_PHASESET);
     assertThat(callsPhasesetField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_PHASESET);
     assertThat(callsPhasesetField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
@@ -200,14 +204,14 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: calls sample Name
+  // Column: calls sample Name
   public void testCreateCallFields_whenGetCallsSampleNameField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> callFields = schemaGen.createCallSubFields();
     TableFieldSchema callsSampleNameField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_SAMPLE_NAME);
 
     assertThat(callsSampleNameField.getName())
-        .isEqualTo(SchemaUtils.FieldName.CALLS_SAMPLE_NAME);
+        .isEqualTo(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME);
     assertThat(callsSampleNameField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_SAMPLE_NAME);
     assertThat(callsSampleNameField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
@@ -215,14 +219,14 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: calls genotype
+  // Column: calls genotype
   public void testCreateCallFields_whenGetCallsGenotypeField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> callFields = schemaGen.createCallSubFields();
     TableFieldSchema callsGenotypeField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_GENOTYPE);
     
     assertThat(callsGenotypeField.getName())
-        .isEqualTo(SchemaUtils.FieldName.CALLS_GENOTYPE);
+        .isEqualTo(Constants.ColumnKeyNames.CALLS_GENOTYPE);
     assertThat(callsGenotypeField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_GENOTYPE);
     assertThat(callsGenotypeField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
@@ -230,18 +234,17 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  //column: calls phaseset
+  // Column: calls phaseset
   public void testCreateCallFields_whenGetCallsPhasesetField_thenIsEqualTo() {
     ImmutableList<TableFieldSchema> callFields = schemaGen.createCallSubFields();
     TableFieldSchema callsPhasesetField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_PHASESET);
 
     assertThat(callsPhasesetField.getName())
-        .isEqualTo(SchemaUtils.FieldName.CALLS_PHASESET);
+        .isEqualTo(Constants.ColumnKeyNames.CALLS_PHASESET);
     assertThat(callsPhasesetField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_PHASESET);
     assertThat(callsPhasesetField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
     assertThat(callsPhasesetField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
   }
-
 }

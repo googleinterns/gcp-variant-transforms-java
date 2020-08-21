@@ -10,5 +10,10 @@ import htsjdk.variant.vcf.VCFHeader;
  */
 public interface SchemaGenerator {
 
-  public TableSchema getSchema(VCFHeader vcfHeader);
+  /**
+   * Creates and returns a BigQuery TableSchema from a VCF file's header
+   * @param vcfHeader
+   * @return TableSchema
+   */
+  TableSchema getSchema(VCFHeader vcfHeader);
 }
