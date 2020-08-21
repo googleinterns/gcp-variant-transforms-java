@@ -45,8 +45,8 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.REFERENCE_NAME);
     assertThat(referenceField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.REFERENCE_NAME);
-    assertThat(referenceField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
-    assertThat(referenceField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
+    assertThat(referenceField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(referenceField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
   }
 
   @Test
@@ -61,8 +61,8 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.START_POSITION);
     assertThat(startPosField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.START_POSITION);
-    assertThat(startPosField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
-    assertThat(startPosField.getType()).isEqualTo(SchemaUtils.FieldType.INTEGER);
+    assertThat(startPosField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(startPosField.getType()).isEqualTo(SchemaUtils.BQFieldType.INTEGER);
   }
 
   @Test
@@ -77,8 +77,8 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.END_POSITION);
     assertThat(endPosField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.END_POSITION);
-    assertThat(endPosField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
-    assertThat(endPosField.getType()).isEqualTo(SchemaUtils.FieldType.INTEGER);
+    assertThat(endPosField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(endPosField.getType()).isEqualTo(SchemaUtils.BQFieldType.INTEGER);
   }
 
   @Test
@@ -93,8 +93,8 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.REFERENCE_BASES);
     assertThat(referenceBasesField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.REFERENCE_BASES);
-    assertThat(referenceBasesField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
-    assertThat(referenceBasesField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
+    assertThat(referenceBasesField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(referenceBasesField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
   }
 
   @Test
@@ -109,8 +109,8 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.NAMES);
     assertThat(namesField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.NAMES);
-    assertThat(namesField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
-    assertThat(namesField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
+    assertThat(namesField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+    assertThat(namesField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
   }
 
   @Test
@@ -125,8 +125,8 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.QUALITY);
     assertThat(qualityField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.QUALITY);
-    assertThat(qualityField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
-    assertThat(qualityField.getType()).isEqualTo(SchemaUtils.FieldType.FLOAT);
+    assertThat(qualityField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(qualityField.getType()).isEqualTo(SchemaUtils.BQFieldType.FLOAT);
   }
 
   @Test
@@ -141,8 +141,8 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.FILTER);
     assertThat(filterField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.FILTER);
-    assertThat(filterField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
-    assertThat(filterField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
+    assertThat(filterField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+    assertThat(filterField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
   }
 
   @Test
@@ -157,8 +157,8 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.CALLS);
     assertThat(callsField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS);
-    assertThat(callsField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
-    assertThat(callsField.getType()).isEqualTo(SchemaUtils.FieldType.RECORD);
+    assertThat(callsField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+    assertThat(callsField.getType()).isEqualTo(SchemaUtils.BQFieldType.RECORD);
   }
 
   @Test
@@ -183,30 +183,30 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME);
     assertThat(callsSampleNameField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_SAMPLE_NAME);
-    assertThat(callsSampleNameField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
-    assertThat(callsSampleNameField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
+    assertThat(callsSampleNameField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(callsSampleNameField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
 
     // Call Genotype asserts
     assertThat(callsGenotypeField.getName())
         .isEqualTo(Constants.ColumnKeyNames.CALLS_GENOTYPE);
     assertThat(callsGenotypeField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_GENOTYPE);
-    assertThat(callsGenotypeField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
-    assertThat(callsGenotypeField.getType()).isEqualTo(SchemaUtils.FieldType.INTEGER);
+    assertThat(callsGenotypeField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+    assertThat(callsGenotypeField.getType()).isEqualTo(SchemaUtils.BQFieldType.INTEGER);
 
     // Call Phaseset asserts
     assertThat(callsPhasesetField.getName())
         .isEqualTo(Constants.ColumnKeyNames.CALLS_PHASESET);
     assertThat(callsPhasesetField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_PHASESET);
-    assertThat(callsPhasesetField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
-    assertThat(callsPhasesetField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
+    assertThat(callsPhasesetField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(callsPhasesetField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
   }
 
   @Test
   // Column: calls sample Name
   public void testCreateCallFields_whenGetCallsSampleNameField_thenIsEqualTo() {
-    ImmutableList<TableFieldSchema> callFields = schemaGen.createCallSubFields();
+    ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields();
     TableFieldSchema callsSampleNameField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_SAMPLE_NAME);
 
@@ -214,14 +214,14 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME);
     assertThat(callsSampleNameField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_SAMPLE_NAME);
-    assertThat(callsSampleNameField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
-    assertThat(callsSampleNameField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
+    assertThat(callsSampleNameField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(callsSampleNameField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
   }
 
   @Test
   // Column: calls genotype
   public void testCreateCallFields_whenGetCallsGenotypeField_thenIsEqualTo() {
-    ImmutableList<TableFieldSchema> callFields = schemaGen.createCallSubFields();
+    ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields();
     TableFieldSchema callsGenotypeField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_GENOTYPE);
     
@@ -229,14 +229,14 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.CALLS_GENOTYPE);
     assertThat(callsGenotypeField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_GENOTYPE);
-    assertThat(callsGenotypeField.getMode()).isEqualTo(SchemaUtils.FieldMode.REPEATED);
-    assertThat(callsGenotypeField.getType()).isEqualTo(SchemaUtils.FieldType.INTEGER);
+    assertThat(callsGenotypeField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+    assertThat(callsGenotypeField.getType()).isEqualTo(SchemaUtils.BQFieldType.INTEGER);
   }
 
   @Test
   // Column: calls phaseset
   public void testCreateCallFields_whenGetCallsPhasesetField_thenIsEqualTo() {
-    ImmutableList<TableFieldSchema> callFields = schemaGen.createCallSubFields();
+    ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields();
     TableFieldSchema callsPhasesetField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_PHASESET);
 
@@ -244,7 +244,7 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(Constants.ColumnKeyNames.CALLS_PHASESET);
     assertThat(callsPhasesetField.getDescription())
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_PHASESET);
-    assertThat(callsPhasesetField.getMode()).isEqualTo(SchemaUtils.FieldMode.NULLABLE);
-    assertThat(callsPhasesetField.getType()).isEqualTo(SchemaUtils.FieldType.STRING);
+    assertThat(callsPhasesetField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(callsPhasesetField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
   }
 }

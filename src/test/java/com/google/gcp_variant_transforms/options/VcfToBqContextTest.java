@@ -144,7 +144,7 @@ public class VcfToBqContextTest {
     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);
     TableFieldSchema sampleField = new TableFieldSchema()
         .setName("sample name")
-        .setType(SchemaUtils.FieldType.STRING);
+        .setType(SchemaUtils.BQFieldType.STRING);
     TableSchema schema = new TableSchema().setFields(ImmutableList.of(sampleField));
     vcfToBqContext.setBqSchema(schema);
    
