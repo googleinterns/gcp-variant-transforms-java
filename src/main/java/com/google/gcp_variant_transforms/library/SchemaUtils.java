@@ -85,7 +85,7 @@ public class SchemaUtils {
   }};
 
   // Maps a constant Field name to its description.
-  public static Map<String, String> constantFieldNameToDescriptionMap = Stream.of(new String[][]{
+  public static Map<String, String> constantFieldNameToDescriptionMap = Stream.of(new String[][] {
       {Constants.ColumnKeyNames.REFERENCE_NAME, FieldDescription.REFERENCE_NAME},
       {Constants.ColumnKeyNames.START_POSITION, FieldDescription.START_POSITION},
       {Constants.ColumnKeyNames.END_POSITION, FieldDescription.END_POSITION},
@@ -97,14 +97,14 @@ public class SchemaUtils {
       }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
 
   // Maps a Call sub-field to its description.
-  public static Map<String, String> callSubFieldNameToDescriptionMap = Stream.of(new String[][]{
+  public static Map<String, String> callSubFieldNameToDescriptionMap = Stream.of(new String[][] {
       {Constants.ColumnKeyNames.CALLS_PHASESET, FieldDescription.CALLS_PHASESET},
       {Constants.ColumnKeyNames.CALLS_GENOTYPE, FieldDescription.CALLS_GENOTYPE},
       {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, FieldDescription.CALLS_SAMPLE_NAME},
   }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
 
   // Maps a constant Field name to its mode.
-  public static Map<String, String> constantFieldNameToModeMap = Stream.of(new String[][]{
+  public static Map<String, String> constantFieldNameToModeMap = Stream.of(new String[][] {
       {Constants.ColumnKeyNames.REFERENCE_NAME, BQFieldMode.NULLABLE},
       {Constants.ColumnKeyNames.START_POSITION, BQFieldMode.NULLABLE},
       {Constants.ColumnKeyNames.END_POSITION, BQFieldMode.NULLABLE},
@@ -116,14 +116,14 @@ public class SchemaUtils {
       }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
 
   // Maps a Call sub-fields to its mode.
-  public static Map<String, String> callSubFieldNameToModeMap = Stream.of(new String[][]{
+  public static Map<String, String> callSubFieldNameToModeMap = Stream.of(new String[][] {
       {Constants.ColumnKeyNames.CALLS_PHASESET, BQFieldMode.NULLABLE},
       {Constants.ColumnKeyNames.CALLS_GENOTYPE, BQFieldMode.REPEATED},
       {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, BQFieldMode.NULLABLE},
   }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
 
   // Maps a constant Field name to its type.
-  public static Map<String, String> constantFieldNameToTypeMap = Stream.of(new String[][]{
+  public static Map<String, String> constantFieldNameToTypeMap = Stream.of(new String[][] {
       {Constants.ColumnKeyNames.REFERENCE_NAME, BQFieldType.STRING},
       {Constants.ColumnKeyNames.START_POSITION, BQFieldType.INTEGER},
       {Constants.ColumnKeyNames.END_POSITION, BQFieldType.INTEGER},
@@ -135,7 +135,7 @@ public class SchemaUtils {
       }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
 
   // Maps a Call sub-field to its type.
-  public static Map<String, String> callSubFieldNameToTypeMap = Stream.of(new String[][]{
+  public static Map<String, String> callSubFieldNameToTypeMap = Stream.of(new String[][] {
       {Constants.ColumnKeyNames.CALLS_PHASESET, BQFieldType.STRING},
       {Constants.ColumnKeyNames.CALLS_GENOTYPE, BQFieldType.INTEGER},
       {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, BQFieldType.STRING}, //verify

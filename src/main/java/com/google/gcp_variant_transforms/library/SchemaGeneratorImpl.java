@@ -15,7 +15,7 @@ import java.util.Collection;
  */
 public class SchemaGeneratorImpl implements SchemaGenerator {
   
-  public TableSchema getSchema(VCFHeader vcfHeader){
+  public TableSchema getSchema(VCFHeader vcfHeader) {
     ImmutableList<TableFieldSchema> schemaFields = getFields(vcfHeader);
     TableSchema schema = new TableSchema()
         .setFields(schemaFields);
@@ -28,11 +28,11 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * @return ImmutableList<TableFieldSchema>
    */
   @VisibleForTesting
-  protected ImmutableList<TableFieldSchema> getFields(VCFHeader vcfHeader){
+  protected ImmutableList<TableFieldSchema> getFields(VCFHeader vcfHeader) {
     ImmutableList.Builder<TableFieldSchema> fieldsBuilder = new ImmutableList.Builder<TableFieldSchema>();
     Collection<String> fieldNames = SchemaUtils.constantFieldIndexToNameMap.values();
 
-    for (String fieldName : fieldNames){
+    for (String fieldName : fieldNames) {
       TableFieldSchema field;
       // Creating a Call record requires generating its sub-fields.
       if( fieldName == Constants.ColumnKeyNames.CALLS){
@@ -65,10 +65,10 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * @return ImmutableList<TableFieldSchema>
    */
   @VisibleForTesting
-  protected ImmutableList<TableFieldSchema> getCallSubFields(){
+  protected ImmutableList<TableFieldSchema> getCallSubFields() {
     ImmutableList.Builder<TableFieldSchema> callSubFieldsBuilder = new ImmutableList.Builder<TableFieldSchema>();
     Collection<String> fieldNames = SchemaUtils.callsSubFieldIndexToNameMap.values();
-    for (String fieldName : fieldNames){
+    for (String fieldName : fieldNames) {
       TableFieldSchema callSubField = new TableFieldSchema()
             .setName(fieldName)
             .setMode(SchemaUtils.callSubFieldNameToModeMap.get(fieldName))
