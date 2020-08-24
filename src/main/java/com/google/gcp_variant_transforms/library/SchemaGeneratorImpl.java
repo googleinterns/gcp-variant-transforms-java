@@ -4,6 +4,7 @@ package com.google.gcp_variant_transforms.library;
 
 import com.google.api.services.bigquery.model.TableFieldSchema;
 import com.google.api.services.bigquery.model.TableSchema;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.common.Constants;
 import htsjdk.variant.vcf.VCFHeader;
@@ -26,7 +27,8 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * @param vcfHeader
    * @return ImmutableList<TableFieldSchema>
    */
-  public ImmutableList<TableFieldSchema> getFields(VCFHeader vcfHeader){
+  @VisibleForTesting
+  protected ImmutableList<TableFieldSchema> getFields(VCFHeader vcfHeader){
     ImmutableList.Builder<TableFieldSchema> fieldsBuilder = new ImmutableList.Builder<TableFieldSchema>();
     Collection<String> fieldNames = SchemaUtils.constantFieldIndexToNameMap.values();
 
@@ -41,7 +43,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
             .setDescription(SchemaUtils.constantFieldNameToDescriptionMap.get(fieldName))
             .setFields(callsSubFields)
             .setType(SchemaUtils.constantFieldNameToTypeMap.get(fieldName));
-      }else {
+      } else {
         field = new TableFieldSchema()
             .setName(fieldName)
             .setMode(SchemaUtils.constantFieldNameToModeMap.get(fieldName))
@@ -62,7 +64,8 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * Creates and returns Call record's subfields.
    * @return ImmutableList<TableFieldSchema>
    */
-  public ImmutableList<TableFieldSchema> getCallSubFields(){
+  @VisibleForTesting
+  protected ImmutableList<TableFieldSchema> getCallSubFields(){
     ImmutableList.Builder<TableFieldSchema> callSubFieldsBuilder = new ImmutableList.Builder<TableFieldSchema>();
     Collection<String> fieldNames = SchemaUtils.callsSubFieldIndexToNameMap.values();
     for (String fieldName : fieldNames){

@@ -34,8 +34,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: reference field
   public void testGetFields_whenGetReferenceField_thenIsEqualTo() {
+    // Column: reference field
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.REFERENCE_NAME);
@@ -50,8 +50,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: start position
   public void testGetFields_whenGetStartPosField_thenIsEqualTo() {
+    // Column: start position
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.START_POSITION);
@@ -66,8 +66,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: end position
   public void testGetFields_whenGetEndPosField_thenIsEqualTo() {
+    // Column: end position
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.END_POSITION);
@@ -82,8 +82,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: reference bases
   public void testGetFields_whenGetReferenceBasesField_thenIsEqualTo() {
+    // Column: reference bases
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.REFERENCE_BASES);
@@ -98,8 +98,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: names
   public void testGetFields_whenGetNamesField_thenIsEqualTo() {
+    // Column: names
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.NAMES);
@@ -114,8 +114,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: quality
   public void testGetFields_whenGetQualityField_thenIsEqualTo() {
+    // Column: quality
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.QUALITY);
@@ -130,8 +130,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: filter
   public void testGetFields_whenGetFilterField_thenIsEqualTo() {
+    // Column: filter
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.FILTER);
@@ -146,8 +146,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: calls record
   public void testGetFields_whenGetCallsField_thenIsEqualTo() {
+    // Column: calls record
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.CALLS);
@@ -162,10 +162,10 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Columns: calls record's subfields
-  // Verifies that the call record's sub-Fields maintain data integrity
-  // after they are added to the call record in a FieldList.
   public void testGetFields_whenGetCallsSubFields_thenIsEqualTo() {
+    // Columns: calls record's subfields
+    // Verifies that the call record's sub-Fields maintain data integrity
+    // after they are added to the call record in a FieldList.
     ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.CALLS);
@@ -204,8 +204,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: calls sample Name
   public void testCreateCallFields_whenGetCallsSampleNameField_thenIsEqualTo() {
+    // Column: calls sample Name
     ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields();
     TableFieldSchema callsSampleNameField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_SAMPLE_NAME);
@@ -219,8 +219,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: calls genotype
   public void testCreateCallFields_whenGetCallsGenotypeField_thenIsEqualTo() {
+    // Column: calls genotype
     ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields();
     TableFieldSchema callsGenotypeField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_GENOTYPE);
@@ -234,8 +234,8 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  // Column: calls phaseset
   public void testCreateCallFields_whenGetCallsPhasesetField_thenIsEqualTo() {
+    // Column: calls phaseset
     ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields();
     TableFieldSchema callsPhasesetField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_PHASESET);

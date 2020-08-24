@@ -31,8 +31,8 @@ public class SchemaUtils {
 
   public static class FieldDescription {
     public static final String REFERENCE_NAME = "Reference name.";
-    public static final String START_POSITION = "Start position (1-based). Corresponds to the first " +
-        "base of the string of reference bases.";
+    public static final String START_POSITION = "Start position (1-based). Corresponds to the " +
+        "first base of the string of reference bases.";
     public static final String END_POSITION = "End position. Corresponds to the first base " +
         "after the last base in the reference allele.";
     public static final String REFERENCE_BASES = "Reference bases.";
@@ -140,5 +140,4 @@ public class SchemaUtils {
       {Constants.ColumnKeyNames.CALLS_GENOTYPE, BQFieldType.INTEGER},
       {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, BQFieldType.STRING}, //verify
       }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
-
 }
