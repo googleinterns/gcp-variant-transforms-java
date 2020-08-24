@@ -2,6 +2,7 @@
 
 package com.google.gcp_variant_transforms.options;
 
+import com.google.api.services.bigquery.model.TableSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.task.VcfToBqTask;
 import com.google.inject.Inject;
@@ -18,6 +19,7 @@ public class VcfToBqContext extends AbstractContext {
   private final String output;
   private ImmutableList<String> headerLines = null;
   private VCFHeader vcfHeader = null;
+  private TableSchema bqSchema = null;
 
   @Inject
   public VcfToBqContext(VcfToBqOptions options) throws IOException {
@@ -57,5 +59,13 @@ public class VcfToBqContext extends AbstractContext {
 
   public void setVCFHeader(VCFHeader vcfHeader){
     this.vcfHeader = vcfHeader;
+  }
+
+  public TableSchema getBqSchema(){
+    return bqSchema;
+  }
+
+  public void setBqSchema(TableSchema schema){
+    this.bqSchema = schema; 
   }
 }
