@@ -16,18 +16,19 @@ import java.util.Set;
  */
 public interface VariantToBqUtils {
   /**
-   * Get reference allele bases. Set null in this field if there is missing value.
+   * Get reference allele bases. Set null in this field if there is a missing value.
    * @param variantContext
    * @return reference bases after handling missing value.
    */
   public String getReferenceBases(VariantContext variantContext);
 
   /**
-   * Get names from VariantContext's ID field. Set null in this field if there is missing value.
+   * Get names from VariantContext's ID field. It should be a semi-colon separated list of unique identifiers
+   * where available. In each separated ID, set null in this field if there is missing value.
    * @param variantContext
-   * @return names after handling missing value.
+   * @return List of names after handling missing value.
    */
-  public String getNames(VariantContext variantContext);
+  public List<String> getNames(VariantContext variantContext);
 
   /**
    * Get alternate allele bases. Set null in this field if there is missing value.
@@ -46,14 +47,15 @@ public interface VariantToBqUtils {
   /**
    * Add variant Info field into BQ table row. For each field value, check if the value size
    * matches the count defined by VCFHeader and convert each value to the defined type.
-   * If the info field number in the VCF header is `A`, add it to the ALT sub field.
+   * If the info field number in the VCF header is `A`, add it to the ALT sub field. The size for this field
+   * should be equal to the expected alternate bases count, which is the size of the alternate bases value.
    * @param row Base TableRow for the VariantContext.
    * @param variantContext
    * @param altMetadata List of TableRow in the alternate bases repeated field.
    * @param vcfHeader
    */
   public void addInfo(TableRow row, VariantContext variantContext, List<TableRow> altMetadata,
-                      VCFHeader vcfHeader);
+                      VCFHeader vcfHeader, int expectedAltCount);
 
   /**
    * Add calls(samples) in the table row with {@link VCFHeader} defined value type and count.
@@ -100,13 +102,13 @@ public interface VariantToBqUtils {
   public void addGenotypes(TableRow row, List<Allele> alleles, VariantContext variantContext);
 
   /**
-   * Add info field in {@link Genotype}, if there is phase set field(PS), set phase set. If there
-   * is no such phase set field, set default phase set "*".
+   * Add all format attribute fields in {@link Genotype}, if there is phase set field(PS), set
+   * phase set. If there is no such phase set field, set default phase set "*".
    * @param row TableRow for each call(sample).
    * @param genotype Current genotype sample in the VariantContext
    * @param vcfHeader Define the field type and count format.
    */
-  public void addInfoAndPhaseSet(TableRow row, Genotype genotype, VCFHeader vcfHeader);
+  public void addFormatAndPhaseSet(TableRow row, Genotype genotype, VCFHeader vcfHeader);
 
   /**
    * <p>
@@ -116,12 +118,9 @@ public interface VariantToBqUtils {
    * </p>
    *
    * <p>
-   *  Notice that if the alt field element size > 1, thus the value should be list and the size
-   *  should be equal to the alt field size. But if alt field is ".", the altMetadata has only
-   *  one TableRow with {"alt": null}, for every value in value list, they should add more {"alt
-   *  ": null} subrow if needed.
-   *  eg: altMetadata: {"alt": null}, alt info: AF=0.333,0.667
-   *  The result tableRow should be {"alt": null, AF=0.333}, {"alt":null, AF=0.667}.
+   *  Notice the size of the value should be equal to the alt field size.
+   *  eg: altMetadata: {"alt": G, T}, alt info: AF=0.333,0.667
+   *  The result tableRow should be {"alt": G, AF=0.333}, {"alt":T, AF=0.667}.
    * </p>
    * @param attrName
    * @param value
@@ -132,4 +131,12 @@ public interface VariantToBqUtils {
   public void splitAlternateAlleleInfoFields(String attrName, Object value,
                                              List<TableRow> altMetadata, VCFHeaderLineType type,
                                              int count);
+
+  /**
+   * If the value is a missing value("."), we need to replace it with null in BQ row, which refers
+   * to `unknown`.
+   * @param value
+   * @return Value after replacing missing value with null.
+   */
+  public String replaceMissingWithNull(String value);
 }

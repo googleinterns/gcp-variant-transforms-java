@@ -7,8 +7,6 @@ package com.google.gcp_variant_transforms.common;
  */
 public class Constants {
   public static final String DEFAULT_PHASESET = "*";
-  public static final String MISSING_FIELD_VALUE = ".";
-  public static final String PHASESET_FORMAT_KEY = "PS";
   public static final int MISSING_GENOTYPE_VALUE = -1;
   public static final int DEFAULT_FIELD_COUNT = -1;
 

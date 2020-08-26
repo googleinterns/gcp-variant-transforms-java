@@ -10,12 +10,14 @@ import static org.mockito.Mockito.when;
 import com.google.api.services.bigquery.model.TableRow;
 import com.google.gcp_variant_transforms.TestEnv;
 import com.google.gcp_variant_transforms.common.Constants;
+import com.google.gcp_variant_transforms.exceptions.CountNotMatchException;
 import com.google.guiceberry.junit4.GuiceBerryRule;
 import com.google.inject.Inject;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.vcf.VCFConstants;
 import htsjdk.variant.vcf.VCFFormatHeaderLine;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderLineCount;
@@ -28,15 +30,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * Units tests for VariantToBqUtilsImpl.java
  */
 public class VariantToBqUtilsTest {
-  private static final String TEST_ID= "id";
+  private static final String TEST_ID = "id";
+  private static final String TEST_ID_WITH_SEMI_COLON = "id;id";
   private static final String TEST_REFERENCE_BASES = "G";
   private static final String TEST_ALTERNATE_BASES = "A";
   private static final String TEST_CALLS_NAME = "sample";
@@ -50,7 +52,6 @@ public class VariantToBqUtilsTest {
   Genotype sample;
   Allele firstGenotypeAllele;
   Allele secondGenotypeAllele;
-  Map<String, Object> extendedAttributes = new HashMap<>();
 
   @Rule
   public final GuiceBerryRule guiceBerry = new GuiceBerryRule(TestEnv.class);
@@ -71,35 +72,58 @@ public class VariantToBqUtilsTest {
   /**
    * Mock VCF Header Lines:
    * ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
-   * ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
    * ##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
+   * ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+   * ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
    * ##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
    */
   @Before
   public void mockVCFHeader() {
     VCFInfoHeaderLine NSMetadata = mock(VCFInfoHeaderLine.class);
-    when(vcfHeader.getInfoHeaderLine("NS")).thenReturn(NSMetadata);
+    when(vcfHeader.getInfoHeaderLine(VCFConstants.SAMPLE_NUMBER_KEY)).thenReturn(NSMetadata);
+    when(NSMetadata.getID()).thenReturn(VCFConstants.SAMPLE_NUMBER_KEY);
     when(NSMetadata.getType()).thenReturn(VCFHeaderLineType.Integer);
     when(NSMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
     when(NSMetadata.getCount()).thenReturn(1);
 
     VCFInfoHeaderLine AFMetadata = mock(VCFInfoHeaderLine.class);
-    when(vcfHeader.getInfoHeaderLine("AF")).thenReturn(AFMetadata);
+    when(vcfHeader.getInfoHeaderLine(VCFConstants.ALLELE_FREQUENCY_KEY)).thenReturn(AFMetadata);
+    when(AFMetadata.getID()).thenReturn(VCFConstants.ALLELE_FREQUENCY_KEY);
     when(AFMetadata.getType()).thenReturn(VCFHeaderLineType.Float);
     when(AFMetadata.getCountType()).thenReturn(VCFHeaderLineCount.A);
 
+    when(vcfHeader.getInfoHeaderLines()).thenReturn(Arrays.asList(NSMetadata, AFMetadata));
+
     // Mock VCF header in Calls.
+    VCFFormatHeaderLine GTMetadata = mock(VCFFormatHeaderLine.class);
+    when(vcfHeader.getFormatHeaderLine(VCFConstants.GENOTYPE_KEY)).thenReturn(GTMetadata);
+    when(GTMetadata.getID()).thenReturn(VCFConstants.GENOTYPE_KEY);
+    when(GTMetadata.getType()).thenReturn(VCFHeaderLineType.String);
+    when(GTMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
+    when(GTMetadata.getCount()).thenReturn(1);
+
     VCFFormatHeaderLine DPMetadata = mock(VCFFormatHeaderLine.class);
-    when(vcfHeader.getFormatHeaderLine("DP")).thenReturn(DPMetadata);
+    when(vcfHeader.getFormatHeaderLine(VCFConstants.DEPTH_KEY)).thenReturn(DPMetadata);
+    when(DPMetadata.getID()).thenReturn(VCFConstants.DEPTH_KEY);
     when(DPMetadata.getType()).thenReturn(VCFHeaderLineType.Integer);
     when(DPMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
     when(DPMetadata.getCount()).thenReturn(1);
 
+    VCFFormatHeaderLine PSMetadata = mock(VCFFormatHeaderLine.class);
+    when(vcfHeader.getFormatHeaderLine(VCFConstants.PHASE_SET_KEY)).thenReturn(PSMetadata);
+    when(PSMetadata.getID()).thenReturn(VCFConstants.PHASE_SET_KEY);
+    when(PSMetadata.getType()).thenReturn(VCFHeaderLineType.String);
+    when(PSMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
+    when(PSMetadata.getCount()).thenReturn(1);
+
     VCFFormatHeaderLine HQMetadata = mock(VCFFormatHeaderLine.class);
-    when(vcfHeader.getFormatHeaderLine("HQ")).thenReturn(HQMetadata);
+    when(vcfHeader.getFormatHeaderLine(VCFConstants.HAPLOTYPE_QUALITY_KEY)).thenReturn(HQMetadata);
+    when(HQMetadata.getID()).thenReturn(VCFConstants.HAPLOTYPE_QUALITY_KEY);
     when(HQMetadata.getType()).thenReturn(VCFHeaderLineType.Integer);
     when(HQMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
     when(HQMetadata.getCount()).thenReturn(2);
+
+    when(vcfHeader.getFormatHeaderLines()).thenReturn(Arrays.asList(GTMetadata, DPMetadata, PSMetadata, HQMetadata));
   }
 
   /**
@@ -117,15 +141,13 @@ public class VariantToBqUtilsTest {
     when(variantContext.getAlleleIndex(secondGenotypeAllele)).thenReturn(2);
     when(sample.getAlleles()).thenReturn(Arrays.asList(firstGenotypeAllele, secondGenotypeAllele));
 
-    // Mock info.
-    when(sample.hasAD()).thenReturn(false);
-    when(sample.hasDP()).thenReturn(true);
-    when(sample.getDP()).thenReturn(1);
-    when(sample.hasGQ()).thenReturn(false);
-    when(sample.hasPL()).thenReturn(false);
-    extendedAttributes.put("HQ", "23,27");
-    extendedAttributes.put("PS", "0");
-    when(sample.getExtendedAttributes()).thenReturn(extendedAttributes);
+    // Mock sample.
+    when(sample.hasAnyAttribute(VCFConstants.DEPTH_KEY)).thenReturn(true);
+    when(sample.getAnyAttribute(VCFConstants.DEPTH_KEY)).thenReturn(1);
+    when(sample.hasAnyAttribute(VCFConstants.HAPLOTYPE_QUALITY_KEY)).thenReturn(true);
+    when(sample.getAnyAttribute(VCFConstants.HAPLOTYPE_QUALITY_KEY)).thenReturn("23,27");
+    when(sample.hasAnyAttribute(VCFConstants.PHASE_SET_KEY)).thenReturn(true);
+    when(sample.getAnyAttribute(VCFConstants.PHASE_SET_KEY)).thenReturn("0");
 
     // Add sample to genotypeContext.
     Iterator<Genotype> genotypeIterator = mock(Iterator.class);
@@ -135,13 +157,15 @@ public class VariantToBqUtilsTest {
     when(variantContext.getGenotypes()).thenReturn(genotypesContext);
   }
 
+
   @Test
   public void testConvertStringValueToRightValueType_whenComparingElement_thenTrue() {
     // Test list of values.
     int count = 2;
     String integerListStr = "23,27";
-    assertThat(variantToBqUtils.convertToDefinedType(integerListStr, VCFHeaderLineType.Integer,
-        count)).isEqualTo(Arrays.asList(23, 27));
+    assertThat(variantToBqUtils.convertToDefinedType(integerListStr,
+        VCFHeaderLineType.Integer, count))
+        .isEqualTo(Arrays.asList(23, 27));
     String floatListStr = "0.333,0.667";
     assertThat(variantToBqUtils.convertToDefinedType(floatListStr, VCFHeaderLineType.Float, count))
         .isEqualTo(Arrays.asList(0.333, 0.667));
@@ -151,7 +175,8 @@ public class VariantToBqUtilsTest {
     // Test int values.
     String integerStr = "23";
     assertThat(variantToBqUtils.convertToDefinedType(integerStr,
-        VCFHeaderLineType.Integer, count)).isEqualTo(23);
+        VCFHeaderLineType.Integer, count))
+        .isEqualTo(23);
 
     // Test float values.
     String floatStr = "0.333";
@@ -170,17 +195,16 @@ public class VariantToBqUtilsTest {
 
     // Test value count does not match the number in the VCFHeader which will raise an exception
     int invalidCount = 2;
-    Exception countNotMatchException = assertThrows(IndexOutOfBoundsException.class, () ->
+    Exception countNotMatchException = assertThrows(CountNotMatchException.class, () ->
         variantToBqUtils.convertToDefinedType(str, VCFHeaderLineType.String, invalidCount));
-    assertThat(countNotMatchException).hasMessageThat().contains("Value count does not match the " +
-        "count defined by VCFHeader");
+    assertThat(countNotMatchException).hasMessageThat().contains("not match the count defined by VCFHeader");
 
     // Test value type does not match the type in the VCFHeader which will raise an exception
     String invalidFloatStr = "1.5";
     int validCount = 1;
     Exception numberFormatException = assertThrows(NumberFormatException.class, () ->
-        variantToBqUtils.convertToDefinedType(invalidFloatStr, VCFHeaderLineType.Integer,
-            validCount));
+        variantToBqUtils.convertToDefinedType(invalidFloatStr,
+            VCFHeaderLineType.Integer, validCount));
     assertThat(numberFormatException).hasMessageThat().contains("For input string");
   }
 
@@ -196,10 +220,16 @@ public class VariantToBqUtilsTest {
   @Test
   public void testGetNames_whenComparingElement_thenTrue() {
     when(variantContext.getID()).thenReturn(TEST_ID);
-    assertThat(variantToBqUtils.getNames(variantContext)).isEqualTo(TEST_ID);
+    assertThat(variantToBqUtils.getNames(variantContext)).isEqualTo(Collections.singletonList(TEST_ID));
+
+    // Test ID with semi-colon:
+    when(variantContext.getID()).thenReturn(TEST_ID_WITH_SEMI_COLON);
+    assertThat(variantToBqUtils.getNames(variantContext).size()).isEqualTo(2);
+    assertThat(variantToBqUtils.getNames(variantContext)).contains(TEST_ID);
+
     // Test empty fields.
-    when(variantContext.getID()).thenReturn(Constants.MISSING_FIELD_VALUE);
-    assertThat(variantToBqUtils.getNames(variantContext)).isNull();
+    when(variantContext.getID()).thenReturn(VCFConstants.MISSING_VALUE_v4);
+    assertThat(variantToBqUtils.getNames(variantContext)).isEqualTo(Collections.singletonList(null));
 
   }
 
@@ -222,32 +252,20 @@ public class VariantToBqUtilsTest {
         .get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isEqualTo("T");
   }
 
-  @Test
-  public void testGetFilter_whenComparingElement_thenTrue() {
-    when(variantContext.getFiltersMaybeNull()).thenReturn(Collections.EMPTY_SET);
-    assertThat(variantToBqUtils.getFilters(variantContext)).isEqualTo(Collections.singleton("PASS"));
-
-    when(variantContext.getFiltersMaybeNull()).thenReturn(Collections.singleton("q10"));
-    assertThat(variantToBqUtils.getFilters(variantContext)).isEqualTo(Collections.singleton("q10"));
-
-    when(variantContext.getFiltersMaybeNull()).thenReturn(null);
-    assertThat(variantToBqUtils.getFilters(variantContext)).isNull();
-  }
-
 
   /**
    * The unit test for addInfo() method should cover the test of the private method
-   * `splitAlternateAlleleInfoFields`, which put info fields with number = `A` into alt field
+   * `splitAlternateAlleleInfoFields`, which put info fields with number = `A` into alt field.
    * Test info record:
    * NS = 2, the NS field number = 1, type is Integer
    * AF = 0.333, the AF field number = A, type is Float
    */
   @Test
   public void testAddInfo_whenCheckingAltAndInfoFieldElements_thenTrue() {
-    Map<String, Object> info = new HashMap<>();
-    info.put("NS", "2");
-    info.put("AF", "0.333");
-    when(variantContext.getAttributes()).thenReturn(info);
+    when(variantContext.hasAttribute(VCFConstants.SAMPLE_NUMBER_KEY)).thenReturn(true);
+    when(variantContext.getAttribute(VCFConstants.SAMPLE_NUMBER_KEY)).thenReturn("2");
+    when(variantContext.hasAttribute(VCFConstants.ALLELE_FREQUENCY_KEY)).thenReturn(true);
+    when(variantContext.getAttribute(VCFConstants.ALLELE_FREQUENCY_KEY)).thenReturn("0.333");
 
     // Mock alt field.
     List<TableRow> altMetadata = new ArrayList<>();
@@ -255,7 +273,7 @@ public class VariantToBqUtilsTest {
     altMetadata.get(0).set(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT, TEST_ALTERNATE_BASES);
 
     TableRow row = new TableRow();
-    variantToBqUtils.addInfo(row, variantContext, altMetadata, vcfHeader);
+    variantToBqUtils.addInfo(row, variantContext, altMetadata, vcfHeader, 1);
 
     assertThat(row.containsKey("NS")).isTrue();
     assertThat(row.get("NS")).isEqualTo(TEST_NS);
@@ -296,14 +314,13 @@ public class VariantToBqUtilsTest {
   public void testAddCallsWithEmptyFields_whenCheckingGenotypeElements_thenTrue() {
     // Second record: contains empty fields.
     // Mock unknown genotypes.
-    when(firstGenotypeAllele.getDisplayString()).thenReturn(Constants.MISSING_FIELD_VALUE);
-    when(secondGenotypeAllele.getDisplayString()).thenReturn(Constants.MISSING_FIELD_VALUE);
+    when(firstGenotypeAllele.getDisplayString()).thenReturn(VCFConstants.MISSING_VALUE_v4);
+    when(secondGenotypeAllele.getDisplayString()).thenReturn(VCFConstants.MISSING_VALUE_v4);
     when(sample.getAlleles()).thenReturn(Arrays.asList(firstGenotypeAllele, secondGenotypeAllele));
 
     // Mock empty info fields.
-    extendedAttributes.remove("PS");
-    extendedAttributes.put("HQ",".,.");
-    when(sample.getExtendedAttributes()).thenReturn(extendedAttributes);
+    when(sample.hasAnyAttribute(VCFConstants.PHASE_SET_KEY)).thenReturn(false); // No phase set presented.
+    when(sample.getAnyAttribute(VCFConstants.HAPLOTYPE_QUALITY_KEY)).thenReturn(".,.");
 
     // Add sample to genotypeContext.
     when(genotypesContext.iterator().hasNext()).thenReturn(true, false);
