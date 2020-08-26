@@ -13,6 +13,8 @@ import com.google.gcp_variant_transforms.common.Constants;
 import com.google.guiceberry.junit4.GuiceBerryRule;
 import com.google.inject.Inject;
 import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFHeaderLineType;
+import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
@@ -95,6 +97,22 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(SchemaUtils.FieldDescription.REFERENCE_BASES);
     assertThat(referenceBasesField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
     assertThat(referenceBasesField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
+  }
+
+  @Test
+  public void testGetFields_whenGetAlternateBasesField_thenIsEqualTo() {
+    // Column: reference bases
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(vcfHeader);
+    UnmodifiableListIterator<TableFieldSchema> fieldIterator =
+        fields.listIterator(SchemaUtils.FieldIndex.ALTERNATE_BASES);
+    TableFieldSchema alternateBasesField = fieldIterator.next();
+
+    assertThat(alternateBasesField.getName())
+        .isEqualTo(Constants.ColumnKeyNames.ALTERNATE_BASES);
+    assertThat(alternateBasesField.getDescription())
+        .isEqualTo(SchemaUtils.FieldDescription.ALTERNATE_BASES);
+    assertThat(alternateBasesField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+    assertThat(alternateBasesField.getType()).isEqualTo(SchemaUtils.BQFieldType.RECORD);
   }
 
   @Test
@@ -204,9 +222,9 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  public void testCreateCallFields_whenGetCallsSampleNameField_thenIsEqualTo() {
+  public void testGetCallSubFields_whenGetCallsSampleNameField_thenIsEqualTo() {
     // Column: calls sample Name
-    ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields();
+    ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields(vcfHeader);
     TableFieldSchema callsSampleNameField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_SAMPLE_NAME);
 
@@ -219,9 +237,9 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  public void testCreateCallFields_whenGetCallsGenotypeField_thenIsEqualTo() {
+  public void testGetCallSubFields_whenGetCallsGenotypeField_thenIsEqualTo() {
     // Column: calls genotype
-    ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields();
+    ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields(vcfHeader);
     TableFieldSchema callsGenotypeField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_GENOTYPE);
     
@@ -234,9 +252,9 @@ public class SchemaGeneratorImplTest {
   }
 
   @Test
-  public void testCreateCallFields_whenGetCallsPhasesetField_thenIsEqualTo() {
+  public void testGetCallSubFields_whenGetCallsPhasesetField_thenIsEqualTo() {
     // Column: calls phaseset
-    ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields();
+    ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields(vcfHeader);
     TableFieldSchema callsPhasesetField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_PHASESET);
 
@@ -246,5 +264,50 @@ public class SchemaGeneratorImplTest {
         .isEqualTo(SchemaUtils.FieldDescription.CALLS_PHASESET);
     assertThat(callsPhasesetField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
     assertThat(callsPhasesetField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
+  }
+
+  @Test
+  public void testCreateInfoField_whenFunctionCall_thenIsEqualTo() {
+    // Column: info field
+    String name = "DP"; // Info ID
+    int count = 1; // count is the Number from info header lines
+    VCFHeaderLineType infoType = VCFHeaderLineType.Integer;
+    String description = "Total Depth";
+    String mode = SchemaUtils.BQFieldMode.NULLABLE;
+    VCFInfoHeaderLine sampleInfoHeaderLine = new VCFInfoHeaderLine(name, count,
+        infoType, description);
+
+    TableFieldSchema infoField = schemaGen.createInfoField(sampleInfoHeaderLine);
+
+    assertThat(infoField.getName()).isEqualTo(name);
+    assertThat(infoField.getDescription()).isEqualTo(description);
+    assertThat(infoField.getType()).isEqualTo(SchemaUtils.BQFieldType.INTEGER);
+    assertThat(infoField.getMode()).isEqualTo(mode);
+  }
+
+  @Test
+  public void testCreateRecordField_whenCallsRecord_thenIsEqualTo() {
+    // Column: Calls record
+    String fieldName = Constants.ColumnKeyNames.CALLS;
+
+    TableFieldSchema infoField = schemaGen.createRecordField(vcfHeader, fieldName);
+
+    assertThat(infoField.getName()).isEqualTo(Constants.ColumnKeyNames.CALLS);
+    assertThat(infoField.getDescription()).isEqualTo(SchemaUtils.FieldDescription.CALLS);
+    assertThat(infoField.getType()).isEqualTo(SchemaUtils.BQFieldType.RECORD);
+    assertThat(infoField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+  }
+
+  @Test
+  public void testCreateRecordField_whenAlternateBasesRecord_thenIsEqualTo() {
+    // Column: Alternate Bases record
+    String fieldName = Constants.ColumnKeyNames.ALTERNATE_BASES;
+
+    TableFieldSchema infoField = schemaGen.createRecordField(vcfHeader, fieldName);
+
+    assertThat(infoField.getName()).isEqualTo(Constants.ColumnKeyNames.ALTERNATE_BASES);
+    assertThat(infoField.getDescription()).isEqualTo(SchemaUtils.FieldDescription.ALTERNATE_BASES);
+    assertThat(infoField.getType()).isEqualTo(SchemaUtils.BQFieldType.RECORD);
+    assertThat(infoField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
   }
 }
