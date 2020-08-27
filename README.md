@@ -21,6 +21,8 @@ JOB_NAME=java-test-run
 GOOGLE_CLOUD_REGION=us-central1
 TEMP_LOCATION=gs://${GOOGLE_CLOUD_PROJECT}/javawork/temp
 OUTPUT=../output/report
+ALLOW_MALFORMED_RECORDS=true
+MALFORMEDRECORDSMESSAGE=../output/error_message
 
 ./gradlew vcfToBq -Prargs=" \
   --project=${GOOGLE_CLOUD_PROJECT} \
@@ -29,5 +31,7 @@ OUTPUT=../output/report
   --region=${GOOGLE_CLOUD_REGION} \
   --tempLocation=${TEMP_LOCATION} \
   --inputFile=${INPUT_FILE} \
-  --output=${OUTPUT}"
+  --output=${OUTPUT} \
+  --allowMalformedRecords=${ALLOW_MALFORMED_RECORDS} \
+  --malformedRecordsMessage=${MALFORMEDRECORDSMESSAGE}"
 ```

@@ -18,6 +18,9 @@ import org.apache.beam.sdk.transforms.Filter;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PCollectionTuple;
+import org.apache.beam.sdk.values.TupleTag;
+import org.apache.beam.sdk.values.TupleTagList;
 import org.apache.beam.sdk.values.TypeDescriptors;
 
 public final class VcfToBqPipelineRunner implements PipelineRunner {
@@ -26,6 +29,9 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
   private final PipelineOptions options;
   private final VcfParser vcfParser;
   private final BigQueryRowGenerator bigQueryRowGenerator;
+
+  private final TupleTag<TableRow> VALID_VARIANT_TO_BQ_RECORD_TAG = new TupleTag<>() {};
+  private final TupleTag<String> MALFORMED_RECORD_ERROR_MESSAGE_TAG = new TupleTag<>() {};
 
   /** Implementation of {@link PipelineRunner} service. */
   @Inject
@@ -39,23 +45,31 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
   }
 
   public void runPipeline() {
-    // Demo code.
     Pipeline pipeline = Pipeline.create(options);
     PCollection<VariantContext> variantContextPCollection = pipeline
         .apply(TextIO.read().from(context.getInputFile()))
         .apply(Filter.by((String inputLine) -> !inputLine.startsWith("#")))
         .apply(ParDo.of(new ConvertLineToVariantFn(vcfParser, context.getHeaderLines())));
-
-    PCollection<TableRow> tableRowPCollection = variantContextPCollection
+    PCollectionTuple tableRowTuple = variantContextPCollection
         .apply("VariantContextToBQRow",
-            ParDo.of(new ConvertVariantToRowFn(bigQueryRowGenerator, context.getVCFHeader())));
+            ParDo.of(new ConvertVariantToRowFn(bigQueryRowGenerator,
+                context.getVCFHeader(), context.getAllowMalformedRecords(),
+                    VALID_VARIANT_TO_BQ_RECORD_TAG, MALFORMED_RECORD_ERROR_MESSAGE_TAG))
+                .withOutputTags(VALID_VARIANT_TO_BQ_RECORD_TAG, TupleTagList.of(MALFORMED_RECORD_ERROR_MESSAGE_TAG)));
 
-    tableRowPCollection
+    PCollection<TableRow> validRowCollection = tableRowTuple.get(VALID_VARIANT_TO_BQ_RECORD_TAG);
+    PCollection<String> errorMessageCollection = tableRowTuple.get(MALFORMED_RECORD_ERROR_MESSAGE_TAG);
+
+    validRowCollection
         .apply(MapElements
             .into(TypeDescriptors.strings())
-                .via(
-                    (TableRow tableRow) -> tableRow.toString()))
+            .via(
+                (TableRow tableRow) -> tableRow.toString()))
         .apply(TextIO.write().to(context.getOutput()).withNoSpilling());
+
+    errorMessageCollection
+        .apply(TextIO.write().to(context.getMalformedRecordsMessagePath()).withNoSpilling());
+
     pipeline.run().waitUntilFinish();
   }
 }

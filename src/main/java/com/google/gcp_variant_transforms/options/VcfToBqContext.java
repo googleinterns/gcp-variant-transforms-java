@@ -16,6 +16,8 @@ public class VcfToBqContext extends AbstractContext {
 
   private final String inputFile;
   private final String output;
+  private final String malformedRecordsMessage;
+  private final Boolean allowMalformedRecords;
   private ImmutableList<String> headerLines = null;
   private VCFHeader vcfHeader = null;
 
@@ -24,6 +26,8 @@ public class VcfToBqContext extends AbstractContext {
     super((PipelineOptions) options);
     this.inputFile = options.getInputFile();
     this.output = options.getOutput();
+    this.allowMalformedRecords = options.getAllowMalformedRecords();
+    this.malformedRecordsMessage = options.getMalformedRecordsMessage();
     validateFlags();
   }
 
@@ -33,6 +37,9 @@ public class VcfToBqContext extends AbstractContext {
     if (this.output == null) {
       throw new IOException("No value for --output flag provided.");
     }
+    if (allowMalformedRecords && malformedRecordsMessage.isEmpty()) {
+      throw new IOException("Malformed records allowed but file path to malformed records not specified.");
+    }
   }
 
   public String getInputFile() {
@@ -41,6 +48,10 @@ public class VcfToBqContext extends AbstractContext {
 
   public String getOutput() {
     return this.output;
+  }
+
+  public String getMalformedRecordsMessagePath() {
+    return this.malformedRecordsMessage;
   }
 
   public void setHeaderLines(ImmutableList<String> headerLines) {
@@ -53,6 +64,10 @@ public class VcfToBqContext extends AbstractContext {
 
   public VCFHeader getVCFHeader(){
     return vcfHeader;
+  }
+
+  public boolean getAllowMalformedRecords() {
+    return this.allowMalformedRecords;
   }
 
   public void setVCFHeader(VCFHeader vcfHeader){
