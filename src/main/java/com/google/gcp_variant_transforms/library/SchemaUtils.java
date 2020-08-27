@@ -16,6 +16,9 @@ import java.util.stream.Stream;
  */
 public class SchemaUtils {
 
+  // Prefix for BQ field names that do not start with alpha characters
+  public static String FALLBACK_FIELD_NAME_PREFIX = "field_";
+
   public static class FieldIndex {
     public static final int REFERENCE_NAME = 0;
     public static final int START_POSITION = 1;
