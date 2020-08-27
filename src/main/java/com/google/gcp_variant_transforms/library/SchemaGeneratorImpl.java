@@ -150,7 +150,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
   protected ImmutableList<TableFieldSchema> getAltBaseSubFields(VCFHeader vcfHeader) {
     ImmutableList.Builder<TableFieldSchema> altBaseSubFieldsBuilder = new ImmutableList.Builder<TableFieldSchema>();
     // Adds the alternate bases allele column.
-    TableFieldSchema altSubField = new TableFieldSchema() // hard coded... ????
+    TableFieldSchema altSubField = new TableFieldSchema()
         .setName(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT)
         .setDescription(SchemaUtils.FieldDescription.ALTERNATE_BASES_ALT)
         .setMode(SchemaUtils.BQFieldMode.NULLABLE)
