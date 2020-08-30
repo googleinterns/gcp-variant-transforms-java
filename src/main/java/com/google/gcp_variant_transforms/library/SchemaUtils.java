@@ -162,4 +162,21 @@ public class SchemaUtils {
           put(VCFHeaderLineType.Float, BQFieldType.FLOAT);
           put(VCFHeaderLineType.Integer, BQFieldType.INTEGER);
   }};
+
+
+  /**
+   * Returns the sanitized field name according to BigQuery restrictions.
+   *
+   * BigQuery field names must follow `[a-zA-Z][a-zA-Z0-9_]*`. This method
+   * converts any unsupported characters to an underscore. Also, if the first
+   * character does not match `[a-zA-z]`, it prepends `FALLBACK_FIELD_NAME_PREFIX`
+   * to the name.
+   * @param fieldName: Name of the field to sanitize
+   * @return sanitized field name
+   */
+  protected static String getSanitizedFieldName(String fieldName){
+    if (!Character.isLetter(fieldName.charAt(0)))
+      fieldName = SchemaUtils.FALLBACK_FIELD_NAME_PREFIX + fieldName;
+    return fieldName.replaceAll("[^a-zA-Z0-9_]", "_");
+  }
 }

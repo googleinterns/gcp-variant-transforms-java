@@ -24,6 +24,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import javax.xml.validation.Schema;
+
 /**
  * Units tests for SchemaGeneratorImpl.java
  */
@@ -46,7 +48,7 @@ public class SchemaGeneratorImplTest {
   public void constructSampleVCFHeader(){
     // Header taken from VCF v4.2 specifications
     Scanner fileReader;
-    ImmutableList.Builder<String> headerLineListBuilder = new ImmutableList.Builder<>();
+    ImmutableList.Builder<String> headerLines = new ImmutableList.Builder<>();
     try {
       fileReader = new Scanner(new File(SAMPLE_VCF_HEADER_FILEPATH));
     } catch (FileNotFoundException e){
@@ -54,10 +56,10 @@ public class SchemaGeneratorImplTest {
       return;
     }
     while(fileReader.hasNextLine()){
-      headerLineListBuilder.add(fileReader.nextLine());
+      headerLines.add(fileReader.nextLine());
     }
     VCFCodec vcfCodec = new VCFCodec();
-    vcfCodec.readActualHeader(new HeaderIterator(headerLineListBuilder.build()));
+    vcfCodec.readActualHeader(new HeaderIterator(headerLines.build()));
     sampleVcfHeader = vcfCodec.getHeader();
   }
 
@@ -303,7 +305,7 @@ public class SchemaGeneratorImplTest {
     VCFInfoHeaderLine sampleInfoHeaderLine = new VCFInfoHeaderLine(name, count,
         infoType, description);
 
-    TableFieldSchema infoField = schemaGen.createInfoField(sampleInfoHeaderLine);
+    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(sampleInfoHeaderLine);
 
     assertThat(infoField.getName()).isEqualTo(name);
     assertThat(infoField.getDescription()).isEqualTo(description);
@@ -371,21 +373,22 @@ public class SchemaGeneratorImplTest {
     String fieldName = Constants.ColumnKeyNames.ALTERNATE_BASES;
 
     // Ordered based on 1 constant alt base sub-field(index 0) and sample vcf header contents
-    int altBaseAltIndex = 0;
+    int altBaseIndex = 0;
     int alleleFrequencyIndex = 1;
     String alleleFrequencyName = "AF";
     String alleleFrequencyDescription = "Allele Frequency";
 
-    TableFieldSchema altBasesField = schemaGen.createRecordField(sampleVcfHeader, fieldName);
-    List<TableFieldSchema> altBasesSubFields = altBasesField.getFields();
-    TableFieldSchema alleleFrequency = altBasesSubFields.get(alleleFrequencyIndex);
-    TableFieldSchema altBaseAlt = altBasesSubFields.get(altBaseAltIndex);
+    TableFieldSchema altField = schemaGen.createRecordField(sampleVcfHeader, fieldName);
+    List<TableFieldSchema> altSubFields = altField.getFields();
+    TableFieldSchema alleleFrequency = altSubFields.get(alleleFrequencyIndex);
+    TableFieldSchema altBaseField = altSubFields.get(altBaseIndex);
 
     // Alternate Bases Alt
-    assertThat(altBaseAlt.getName()).isEqualTo(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT);
-    assertThat(altBaseAlt.getDescription()).isEqualTo(SchemaUtils.FieldDescription.ALTERNATE_BASES_ALT);
-    assertThat(altBaseAlt.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
-    assertThat(altBaseAlt.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
+    assertThat(altBaseField.getName()).isEqualTo(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT);
+    assertThat(altBaseField.getDescription())
+        .isEqualTo(SchemaUtils.FieldDescription.ALTERNATE_BASES_ALT);
+    assertThat(altBaseField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(altBaseField.getType()).isEqualTo(SchemaUtils.BQFieldType.STRING);
 
     // ID="AF" -- Genotype
     assertThat(alleleFrequency.getName()).isEqualTo(alleleFrequencyName);
@@ -398,7 +401,7 @@ public class SchemaGeneratorImplTest {
   public void testGetSanitizedFieldName_whenInvalidStart_thenIsEqualTo() {
     String fieldName = "9Invalid_name";
     String expectedFieldName ="field_9Invalid_name";
-    String actualFieldName = schemaGen.getSanitizedFieldName(fieldName);
+    String actualFieldName = SchemaUtils.getSanitizedFieldName(fieldName);
 
     assertThat(actualFieldName).isEqualTo(expectedFieldName);
   }
@@ -407,7 +410,7 @@ public class SchemaGeneratorImplTest {
   public void testGetSanitizedFieldName_whenInvalidSymbol_thenIsEqualTo() {
     String fieldName = "Invalid_n@me";
     String expectedFieldName ="Invalid_n_me";
-    String actualFieldName = schemaGen.getSanitizedFieldName(fieldName);
+    String actualFieldName = SchemaUtils.getSanitizedFieldName(fieldName);
 
     assertThat(actualFieldName).isEqualTo(expectedFieldName);
   }
@@ -415,7 +418,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetSanitizedFieldName_whenValid_thenIsEqualTo() {
     String fieldName = "valid_name";
-    String actualFieldName = schemaGen.getSanitizedFieldName(fieldName);
+    String actualFieldName = SchemaUtils.getSanitizedFieldName(fieldName);
 
     assertThat(actualFieldName).isEqualTo(fieldName); // Should be unchanged.
   }

@@ -7,6 +7,7 @@ import com.google.api.services.bigquery.model.TableSchema;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.common.Constants;
+import htsjdk.variant.vcf.VCFCompoundHeaderLine;
 import htsjdk.variant.vcf.VCFFormatHeaderLine;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderLineCount;
@@ -32,22 +33,22 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    */
   @VisibleForTesting
   protected ImmutableList<TableFieldSchema> getFields(VCFHeader vcfHeader) {
-    ImmutableList.Builder<TableFieldSchema> fieldsBuilder = new ImmutableList.Builder<TableFieldSchema>();
+    ImmutableList.Builder<TableFieldSchema> fields = new ImmutableList.Builder<TableFieldSchema>();
     Collection<String> constantFieldNames = SchemaUtils.constantFieldIndexToNameMap.values();
 
     // Adds constant fields and records.
     for (String constantFieldName : constantFieldNames) {
       TableFieldSchema field = createField(vcfHeader, constantFieldName);
-      fieldsBuilder.add(field);
+      fields.add(field);
     }
     // Adds remaining INFO fields.
     for (VCFInfoHeaderLine infoHeaderLine : vcfHeader.getInfoHeaderLines()){
       // INFO header lines with Number = 'A' are added under the alternate bases record
       if (infoHeaderLine.getCountType() != VCFHeaderLineCount.A)
-        fieldsBuilder.add(createInfoField(infoHeaderLine));
+        fields.add(convertCompoundHeaderLineToField(infoHeaderLine));
     }
     
-    return fieldsBuilder.build();
+    return fields.build();
   }
 
   /**
@@ -58,16 +59,10 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    */
   protected TableFieldSchema createField(VCFHeader vcfHeader, String fieldName){
     TableFieldSchema field;
-    switch(fieldName) {
-      // Call records require generating the record's sub-fields.
-      case(Constants.ColumnKeyNames.CALLS):
-        field = createRecordField(vcfHeader, Constants.ColumnKeyNames.CALLS);
-        break;
-      // Alternate Base records require generating the record's sub-fields.
-      case(Constants.ColumnKeyNames.ALTERNATE_BASES):
-        field = createRecordField(vcfHeader, Constants.ColumnKeyNames.ALTERNATE_BASES);
-        break;
-      default: // All other fields, which are not records.
+    if (fieldName == Constants.ColumnKeyNames.ALTERNATE_BASES ||
+        fieldName == Constants.ColumnKeyNames.CALLS) {
+      field = createRecordField(vcfHeader, fieldName);
+    } else {
         field = new TableFieldSchema()
             .setName(fieldName)
             .setDescription(SchemaUtils.constantFieldNameToDescriptionMap.get(fieldName))
@@ -86,9 +81,9 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
   @VisibleForTesting
   protected TableFieldSchema createRecordField(VCFHeader vcfHeader, String fieldName) {
     ImmutableList<TableFieldSchema> subFields;
-    if (fieldName == Constants.ColumnKeyNames.ALTERNATE_BASES)
-       subFields = getAltBaseSubFields(vcfHeader);
-    else subFields = getCallSubFields(vcfHeader); // Call record
+    if (fieldName == Constants.ColumnKeyNames.ALTERNATE_BASES) {
+      subFields = getAltSubFields(vcfHeader);
+    } else { subFields = getCallSubFields(vcfHeader); } // Call record
 
     return new TableFieldSchema()
         .setName(fieldName)
@@ -99,17 +94,17 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
   }
 
   /**
-   * Creates and returns an INFO Field
-   * @param infoHeaderLine
-   * @return an info Field
+   * Creates and returns a Field from a compound header line
+   * @param headerLine
+   * @return an INFO or FORMAT Field
    */
   @VisibleForTesting
-  protected TableFieldSchema createInfoField(VCFInfoHeaderLine infoHeaderLine) {
+  protected TableFieldSchema convertCompoundHeaderLineToField(VCFCompoundHeaderLine headerLine) {
     return new TableFieldSchema()
-        .setName(getSanitizedFieldName(infoHeaderLine.getID()))
-        .setDescription(infoHeaderLine.getDescription())
+        .setName(SchemaUtils.getSanitizedFieldName(headerLine.getID()))
+        .setDescription(headerLine.getDescription())
         .setMode(SchemaUtils.BQFieldMode.NULLABLE) // Always NULLABLE
-        .setType(SchemaUtils.HTSJDKTypeToBQTypeMap.get(infoHeaderLine.getType()));
+        .setType(SchemaUtils.HTSJDKTypeToBQTypeMap.get(headerLine.getType()));
   }
 
   /**
@@ -119,7 +114,8 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    */
   @VisibleForTesting
   protected ImmutableList<TableFieldSchema> getCallSubFields(VCFHeader vcfHeader) {
-    ImmutableList.Builder<TableFieldSchema> callSubFieldsBuilder = new ImmutableList.Builder<TableFieldSchema>();
+    ImmutableList.Builder<TableFieldSchema> callSubFields =
+        new ImmutableList.Builder<TableFieldSchema>();
     Collection<String> fieldNames = SchemaUtils.callsSubFieldIndexToNameMap.values();
     for (String fieldName : fieldNames) {
       TableFieldSchema callSubField = new TableFieldSchema()
@@ -127,18 +123,13 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
           .setDescription(SchemaUtils.callSubFieldNameToDescriptionMap.get(fieldName))
           .setMode(SchemaUtils.callSubFieldNameToModeMap.get(fieldName))
           .setType(SchemaUtils.callSubFieldNameToTypeMap.get(fieldName));
-      callSubFieldsBuilder.add(callSubField);
+      callSubFields.add(callSubField);
     }
     // Adds the FORMAT fields under the Calls record
     for (VCFFormatHeaderLine formatHeaderLine : vcfHeader.getFormatHeaderLines()){
-        TableFieldSchema formatField = new TableFieldSchema()
-            .setName(getSanitizedFieldName(formatHeaderLine.getID()))
-            .setDescription(formatHeaderLine.getDescription())
-            .setMode(SchemaUtils.BQFieldMode.NULLABLE) // Always NULLABLE
-            .setType(SchemaUtils.HTSJDKTypeToBQTypeMap.get(formatHeaderLine.getType()));
-        callSubFieldsBuilder.add(formatField);
+        callSubFields.add(convertCompoundHeaderLineToField(formatHeaderLine));
       }
-    return callSubFieldsBuilder.build();
+    return callSubFields.build();
   }
 
   /**
@@ -147,42 +138,22 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * @return a list of alternate base sub-fields
    */
   @VisibleForTesting
-  protected ImmutableList<TableFieldSchema> getAltBaseSubFields(VCFHeader vcfHeader) {
-    ImmutableList.Builder<TableFieldSchema> altBaseSubFieldsBuilder = new ImmutableList.Builder<TableFieldSchema>();
+  protected ImmutableList<TableFieldSchema> getAltSubFields(VCFHeader vcfHeader) {
+    ImmutableList.Builder<TableFieldSchema> altSubFields =
+        new ImmutableList.Builder<TableFieldSchema>();
     // Adds the alternate bases allele column.
     TableFieldSchema altSubField = new TableFieldSchema()
         .setName(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT)
         .setDescription(SchemaUtils.FieldDescription.ALTERNATE_BASES_ALT)
         .setMode(SchemaUtils.BQFieldMode.NULLABLE)
         .setType(SchemaUtils.BQFieldType.STRING);
-    altBaseSubFieldsBuilder.add(altSubField);
+    altSubFields.add(altSubField);
     // Adds the INFO fields with Number = A (i.e., one value for each alternate) among alternates.
     for (VCFInfoHeaderLine infoHeaderLine : vcfHeader.getInfoHeaderLines()){
       if (infoHeaderLine.getCountType() == VCFHeaderLineCount.A){
-        TableFieldSchema infoSubField = new TableFieldSchema()
-            .setName(getSanitizedFieldName(infoHeaderLine.getID()))
-            .setDescription(infoHeaderLine.getDescription())
-            .setMode(SchemaUtils.BQFieldMode.NULLABLE) // Always NULLABLE
-            .setType(SchemaUtils.HTSJDKTypeToBQTypeMap.get(infoHeaderLine.getType()));
-        altBaseSubFieldsBuilder.add(infoSubField);
+        altSubFields.add(convertCompoundHeaderLineToField(infoHeaderLine));
       }
     }
-    return altBaseSubFieldsBuilder.build();
-  }
-
-  /**
-   * Returns the sanitized field name according to BigQuery restrictions.
-   *
-   * BigQuery field names must follow `[a-zA-Z][a-zA-Z0-9_]*`. This method
-   * converts any unsupported characters to an underscore. Also, if the first
-   * character does not match `[a-zA-z]`, it prepends `FALLBACK_FIELD_NAME_PREFIX`
-   * to the name.
-   * @param fieldName: Name of the field to sanitize
-   * @return sanitized field name
-   */
-  protected String getSanitizedFieldName(String fieldName){
-    if (!Character.isLetter(fieldName.charAt(0)))
-      fieldName = SchemaUtils.FALLBACK_FIELD_NAME_PREFIX + fieldName;
-    return fieldName.replaceAll("[^a-zA-Z0-9_]", "_");
+    return altSubFields.build();
   }
 }
