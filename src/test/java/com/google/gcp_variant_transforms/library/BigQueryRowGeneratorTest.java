@@ -66,20 +66,6 @@ public class BigQueryRowGeneratorTest {
 
   @Inject public BigQueryRowGenerator bigQueryRowGenerator;
 
-  /**
-   * Records             in the test VCF file:
-   * #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
-   * 20	14370	rs6054257	G	A	29	PASS	NS=3;DP=14;AF=0.5;DB;H2	GT:GQ:DP:HQ	0|0:48:1:51,51
-   * 1|0:48:8:51,51	1/1:43:5:.,.
-   * 20	17330	.	T	A	3	q10	NS=3;DP=11;AF=0.017	GT:GQ:DP:HQ	0|0:49:3:58,50	0|1:3:5:65,3	0/0:41:3
-   * 20	1110696	rs6040355	A	G,T	67	PASS	NS=2;DP=10;AF=0.333,0.667;AA=T;DB	GT:GQ:DP:HQ
-   * 1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4
-   * 20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:7:56,60	0|0:48:4:51,51	0/0:61:2
-   * 19	1234567	microsat1	GTCT	G,GTACT	50	PASS	NS=3;DP=9;AA=G	GT:GQ:DP	0/1:35:4	0/2:17:2
-   * 1/1:40:3
-   * There are 5 records in the file, thus there will be 5 BQ rows
-   * The test should cover all kinds of elements in those records, including corner cases.
-   */
   @Before
   public void buildBigQueryRowsFromVCFFile() throws FileNotFoundException {
     File smallFile = new File(TEST_FILE);
@@ -107,18 +93,18 @@ public class BigQueryRowGeneratorTest {
 
   @Test
   public void testBigQueryRowBaseElements_whenCheckingRowElements_thenTrue() {
-    assertThat(rowWithFieldValues.get(Constants.ColumnKeyConstants.REFERENCE_NAME))
+    assertThat(rowWithFieldValues.get(Constants.ColumnKeyNames.REFERENCE_NAME))
         .isEqualTo(TEST_REFERENCE_NAME);
-    assertThat(rowWithFieldValues.get(Constants.ColumnKeyConstants.START_POSITION))
+    assertThat(rowWithFieldValues.get(Constants.ColumnKeyNames.START_POSITION))
         .isEqualTo(TEST_START);
-    assertThat(rowWithFieldValues.get(Constants.ColumnKeyConstants.END_POSITION))
+    assertThat(rowWithFieldValues.get(Constants.ColumnKeyNames.END_POSITION))
         .isEqualTo(TEST_END);
-    assertThat(rowWithFieldValues.get(Constants.ColumnKeyConstants.NAMES))
-        .isEqualTo(TEST_ID);
-    assertThat(rowWithFieldValues.get(Constants.ColumnKeyConstants.REFERENCE_BASES))
+    assertThat(rowWithFieldValues.get(Constants.ColumnKeyNames.NAMES))
+        .isEqualTo(Collections.singletonList(TEST_ID));
+    assertThat(rowWithFieldValues.get(Constants.ColumnKeyNames.REFERENCE_BASES))
         .isEqualTo(TEST_REFERENCE_BASES);
-    assertThat(rowWithFieldValues.get(Constants.ColumnKeyConstants.QUALITY)).isEqualTo(29);
-    assertThat(rowWithFieldValues.get(Constants.ColumnKeyConstants.FILTER))
+    assertThat(rowWithFieldValues.get(Constants.ColumnKeyNames.QUALITY)).isEqualTo(29);
+    assertThat(rowWithFieldValues.get(Constants.ColumnKeyNames.FILTER))
         .isEqualTo(FILTER_PASS);
   }
 
@@ -126,9 +112,9 @@ public class BigQueryRowGeneratorTest {
   public void testBigQueryRowAlternatesAndInfo_whenCheckingRowElements_thenTrue() {
     // AF field has type=`A` in VCFHeader, which should be moved from Info field to ALT field
     List<TableRow> altMetadata = (List<TableRow>) rowWithFieldValues.get(
-        Constants.ColumnKeyConstants.ALTERNATE_BASES);
+        Constants.ColumnKeyNames.ALTERNATE_BASES);
     TableRow altBase = altMetadata.get(0);
-    assertThat(altBase.get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT))
+    assertThat(altBase.get(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT))
         .isEqualTo(TEST_ALTERNATE_BASES);
     assertThat(altBase.get("AF")).isEqualTo(TEST_AF);
 
@@ -141,15 +127,15 @@ public class BigQueryRowGeneratorTest {
   @Test
   public void testBigQueryRowCalls_whenCheckingRowElements_thenTrue() {
     List<TableRow> calls = (List<TableRow>) rowWithFieldValues
-        .get(Constants.ColumnKeyConstants.CALLS);
+        .get(Constants.ColumnKeyNames.CALLS);
     assertThat(calls.size()).isEqualTo(3);
     // The rowWithFieldValues also contains record HQ=".,.", which should be [null,null] in the row.
     TableRow rowWithMissingHQ = calls.get(2);
-    assertThat(rowWithMissingHQ.get(Constants.ColumnKeyConstants.CALLS_NAME))
+    assertThat(rowWithMissingHQ.get(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME))
         .isEqualTo(TEST_CALLS_NAME);
-    assertThat(rowWithMissingHQ.get(Constants.ColumnKeyConstants.CALLS_PHASESET))
+    assertThat(rowWithMissingHQ.get(Constants.ColumnKeyNames.CALLS_PHASESET))
         .isEqualTo(DEFAULT_PHASE_SET);
-    assertThat(rowWithMissingHQ.get(Constants.ColumnKeyConstants.CALLS_GENOTYPE))
+    assertThat(rowWithMissingHQ.get(Constants.ColumnKeyNames.CALLS_GENOTYPE))
         .isEqualTo(Arrays.asList(TEST_GENOTYPE, TEST_GENOTYPE));
     assertThat(rowWithMissingHQ.get("HQ")).isEqualTo(Arrays.asList(null, null));
   }
@@ -157,25 +143,26 @@ public class BigQueryRowGeneratorTest {
   @Test
   public void testBigQueryRowWithEmptyFields_whenCheckingRowElements_thenTrue() {
     // ID field is ".", which should be null in the BQ row.
-    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.NAMES)).isNull();
+    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.NAMES))
+        .isEqualTo(Collections.singletonList(null));
 
     // Quality field is ".", which should be -10 in the BQ row.
-    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.QUALITY))
+    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.QUALITY))
         .isEqualTo(UNKNOWN_QUALITY);
 
-    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.FILTER)).isNull();
+    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.FILTER)).isNull();
 
     // ALT field is ".", which should be null in the BQ row.
     List<TableRow> emptyAltMetadata = (List<TableRow>) rowWithEmptyFields
-        .get(Constants.ColumnKeyConstants.ALTERNATE_BASES);
+        .get(Constants.ColumnKeyNames.ALTERNATE_BASES);
     TableRow emptyAltBase = emptyAltMetadata.get(0);
-    assertThat(emptyAltBase.get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isNull();
+    assertThat(emptyAltBase.get(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT)).isNull();
 
     // GT field is ".", which should be default genotype(-1) in the BQ row.
     List<TableRow> calls = (List<TableRow>) rowWithEmptyFields
-        .get(Constants.ColumnKeyConstants.CALLS);
+        .get(Constants.ColumnKeyNames.CALLS);
     TableRow rowWithMissingGenotype = calls.get(0);
-    assertThat(rowWithMissingGenotype.get(Constants.ColumnKeyConstants.CALLS_GENOTYPE))
+    assertThat(rowWithMissingGenotype.get(Constants.ColumnKeyNames.CALLS_GENOTYPE))
         .isEqualTo(Arrays.asList(DEFAULT_GENOTYPE, DEFAULT_GENOTYPE));
   }
 }

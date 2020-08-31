@@ -1,13 +1,16 @@
 // Copyright 2020 Google LLC
- 
+
 package com.google.gcp_variant_transforms.options;
- 
+
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
- 
+
 import com.google.common.collect.ImmutableList;
+import com.google.api.services.bigquery.model.TableFieldSchema;
+import com.google.api.services.bigquery.model.TableSchema;
+import com.google.gcp_variant_transforms.library.SchemaUtils;
 import htsjdk.variant.vcf.VCFHeader;
 import java.io.IOException;
 import org.junit.Test;
@@ -90,17 +93,17 @@ public class VcfToBqContextTest {
   }
  
  @Test
- public void testVcfContext_whenSetHeaderLines_thenIsEqualTo() throws IOException {
+  public void testVcfContext_whenSetHeaderLines_thenIsEqualTo() throws IOException {
     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
     ImmutableList<String> headerLines = createHeaderLines();
     vcfToBqContext.setHeaderLines(headerLines);
  
     assertThat(vcfToBqContext.getHeaderLines()).containsExactlyElementsIn(headerLines);
   }
- 
+
   @Test
   public void testVcfContext_whenSetHeaderLines_thenNull() throws IOException {
-    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);
     vcfToBqContext.setHeaderLines(null);
  
     assertThat(vcfToBqContext.getHeaderLines()).isNull();
@@ -122,10 +125,29 @@ public class VcfToBqContextTest {
 
   @Test
   public void testVcfContext_whenSetVCFHeader_thenIsEqualTo() throws IOException {
-     VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);   
-     VCFHeader vcfHeader = mock(VCFHeader.class);
-     vcfToBqContext.setVCFHeader(vcfHeader);
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);
+    VCFHeader vcfHeader = mock(VCFHeader.class);
+    vcfToBqContext.setVCFHeader(vcfHeader);
   
-     assertThat(vcfToBqContext.getVCFHeader()).isEqualTo(vcfHeader);
+    assertThat(vcfToBqContext.getVCFHeader()).isEqualTo(vcfHeader);
    }
+
+   @Test
+  public void testVcfContext_whenGetBqSchema_thenNull() throws IOException {
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);
+  
+    assertThat(vcfToBqContext.getBqSchema()).isNull();
+   }
+ 
+   @Test
+  public void testVcfContext_whenSetBqSchema_thenIsEqualTo() throws IOException {
+    VcfToBqContext vcfToBqContext = new VcfToBqContext(MOCKED_VCF_TO_BQ_OPTIONS);
+    TableFieldSchema sampleField = new TableFieldSchema()
+        .setName("sample name")
+        .setType(SchemaUtils.BQFieldType.STRING);
+    TableSchema schema = new TableSchema().setFields(ImmutableList.of(sampleField));
+    vcfToBqContext.setBqSchema(schema);
+   
+    assertThat(vcfToBqContext.getBqSchema()).isEqualTo(schema);
+  }
 }

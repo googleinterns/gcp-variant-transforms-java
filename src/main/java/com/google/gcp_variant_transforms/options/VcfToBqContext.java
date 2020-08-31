@@ -2,6 +2,7 @@
 
 package com.google.gcp_variant_transforms.options;
 
+import com.google.api.services.bigquery.model.TableSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.task.VcfToBqTask;
 import com.google.inject.Inject;
@@ -20,6 +21,7 @@ public class VcfToBqContext extends AbstractContext {
   private final Boolean allowMalformedRecords;
   private ImmutableList<String> headerLines = null;
   private VCFHeader vcfHeader = null;
+  private TableSchema bqSchema = null;
 
   @Inject
   public VcfToBqContext(VcfToBqOptions options) throws IOException {
@@ -27,7 +29,7 @@ public class VcfToBqContext extends AbstractContext {
     this.inputFile = options.getInputFile();
     this.output = options.getOutput();
     this.allowMalformedRecords = options.getAllowMalformedRecords();
-    this.malformedRecordsMessage = options.getMalformedRecordsMessage();
+    this.malformedRecordsMessage = options.getMalformedRecordsReportPath();
     validateFlags();
   }
 
@@ -38,7 +40,8 @@ public class VcfToBqContext extends AbstractContext {
       throw new IOException("No value for --output flag provided.");
     }
     if (allowMalformedRecords && malformedRecordsMessage.isEmpty()) {
-      throw new IOException("Malformed records allowed but file path to malformed records not specified.");
+      throw new IOException("Malformed records allowed but file path to malformed records not " +
+          "specified.");
     }
   }
 
@@ -72,5 +75,13 @@ public class VcfToBqContext extends AbstractContext {
 
   public void setVCFHeader(VCFHeader vcfHeader){
     this.vcfHeader = vcfHeader;
+  }
+
+  public TableSchema getBqSchema(){
+    return bqSchema;
+  }
+
+  public void setBqSchema(TableSchema schema){
+    this.bqSchema = schema; 
   }
 }

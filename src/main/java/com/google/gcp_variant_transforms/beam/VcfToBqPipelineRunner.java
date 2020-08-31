@@ -30,8 +30,8 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
   private final VcfParser vcfParser;
   private final BigQueryRowGenerator bigQueryRowGenerator;
 
-  private final TupleTag<TableRow> VALID_VARIANT_TO_BQ_RECORD_TAG = new TupleTag<>() {};
-  private final TupleTag<String> MALFORMED_RECORD_ERROR_MESSAGE_TAG = new TupleTag<>() {};
+  private final TupleTag<TableRow> VALID_VARIANT_TO_BQ_RECORD_TAG = new TupleTag<TableRow>() {};
+  private final TupleTag<String> MALFORMED_RECORD_ERROR_MESSAGE_TAG = new TupleTag<String>() {};
 
   /** Implementation of {@link PipelineRunner} service. */
   @Inject
@@ -55,7 +55,8 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
             ParDo.of(new ConvertVariantToRowFn(bigQueryRowGenerator,
                 context.getVCFHeader(), context.getAllowMalformedRecords(),
                     VALID_VARIANT_TO_BQ_RECORD_TAG, MALFORMED_RECORD_ERROR_MESSAGE_TAG))
-                .withOutputTags(VALID_VARIANT_TO_BQ_RECORD_TAG, TupleTagList.of(MALFORMED_RECORD_ERROR_MESSAGE_TAG)));
+                .withOutputTags(VALID_VARIANT_TO_BQ_RECORD_TAG,
+                    TupleTagList.of(MALFORMED_RECORD_ERROR_MESSAGE_TAG)));
 
     PCollection<TableRow> validRowCollection = tableRowTuple.get(VALID_VARIANT_TO_BQ_RECORD_TAG);
     PCollection<String> errorMessageCollection = tableRowTuple.get(MALFORMED_RECORD_ERROR_MESSAGE_TAG);
