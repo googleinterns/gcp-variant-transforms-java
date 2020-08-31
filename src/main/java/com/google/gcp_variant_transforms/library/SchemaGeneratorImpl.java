@@ -8,6 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.common.Constants;
 import htsjdk.variant.vcf.VCFHeader;
+
 import java.util.Collection;
 
 /**

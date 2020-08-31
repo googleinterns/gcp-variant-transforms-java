@@ -3,6 +3,7 @@
 package com.google.gcp_variant_transforms.options;
 
 import com.google.gcp_variant_transforms.task.VcfToBqTask;
+import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.Validation.Required;
@@ -20,6 +21,16 @@ public interface VcfToBqOptions extends PipelineOptions {
   @Required
   String getInputFile();
   void setInputFile(String value);
+
+  @Description("Flag for allowing malformed records")
+  @Default.Boolean(true)
+  public Boolean getAllowMalformedRecords();
+  void setAllowMalformedRecords(Boolean value);
+
+  @Description("Path of the file of malformed VCF records")
+  @Default.String("")
+  public String getMalformedRecordsReportPath();
+  void setMalformedRecordsReportPath(String value);
 
   /** Used only for demo, to be deleted. */
   @Description("Path of the file to write to")

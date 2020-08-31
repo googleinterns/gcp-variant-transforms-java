@@ -10,6 +10,7 @@ public class LibraryTestModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(VcfParser.class).to(VcfParserImpl.class);
+    bind(BigQueryRowGenerator.class).to(BigQueryRowGeneratorImpl.class);
     bind(VariantToBqUtils.class).to(VariantToBqUtilsImpl.class);
   }
 }
