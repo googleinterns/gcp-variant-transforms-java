@@ -49,13 +49,13 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     // If field value is '.', alternateAllelesList will be empty.
     if (altAlleles.isEmpty()) {
       TableRow subRow = new TableRow();
-      subRow.set(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT, null);
+      subRow.set(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT, null);
       altMetadata.add(subRow);
     } else {
       for (Allele altAllele : altAlleles) {
         TableRow subRow = new TableRow();
         String altBase = altAllele.getDisplayString();
-        subRow.set(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT, altBase);
+        subRow.set(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT, altBase);
         altMetadata.add(subRow);
       }
     }
@@ -110,7 +110,7 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     }
     for (Genotype genotype : genotypes) {
       TableRow call = new TableRow();
-      call.set(Constants.ColumnKeyConstants.CALLS_NAME, genotype.getSampleName());
+      call.set(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, genotype.getSampleName());
       addFormatAndPhaseSet(call, genotype, vcfHeader);
       addGenotypes(call, genotype.getAlleles(), variantContext);
       callRows.add(call);
@@ -183,7 +183,7 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
         genotypes.add(variantContext.getAlleleIndex(allele));
       }
     }
-    row.set(Constants.ColumnKeyConstants.CALLS_GENOTYPE, genotypes);
+    row.set(Constants.ColumnKeyNames.CALLS_GENOTYPE, genotypes);
   }
 
   public void addFormatAndPhaseSet(TableRow row, Genotype genotype, VCFHeader vcfHeader) {
@@ -224,9 +224,9 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     }
     if (phaseSet == null || !phaseSet.isEmpty()) {
       // PhaseSet is presented(MISSING_FIELD_VALUE('.') or a specific value).
-      row.set(Constants.ColumnKeyConstants.CALLS_PHASESET, phaseSet);
+      row.set(Constants.ColumnKeyNames.CALLS_PHASESET, phaseSet);
     } else {
-      row.set(Constants.ColumnKeyConstants.CALLS_PHASESET, Constants.DEFAULT_PHASESET);
+      row.set(Constants.ColumnKeyNames.CALLS_PHASESET, Constants.DEFAULT_PHASESET);
     }
   }
 
@@ -243,7 +243,7 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
         if (i >= altMetadata.size()) {
           // Match each field in each repeated subRow.
           altMetadata.add(new TableRow());
-          altMetadata.get(i).set(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT, null);
+          altMetadata.get(i).set(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT, null);
         }
         // Set attr into alt field.
         altMetadata.get(i).set(attrName, convertSingleObjectToDefinedType(valList.get(i), type));

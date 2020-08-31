@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-
 /**
  * Units tests for VariantToBqUtilsImpl.java
  */
@@ -198,7 +197,8 @@ public class VariantToBqUtilsTest {
     int invalidCount = 2;
     Exception countNotMatchException = assertThrows(CountNotMatchException.class, () ->
         variantToBqUtils.convertToDefinedType(str, VCFHeaderLineType.String, invalidCount));
-    assertThat(countNotMatchException).hasMessageThat().contains("not match the count defined by VCFHeader");
+    assertThat(countNotMatchException).hasMessageThat()
+        .contains("not match the count defined by VCFHeader");
 
     // Test value type does not match the type in the VCFHeader which will raise an exception
     String invalidFloatStr = "1.5";
@@ -245,13 +245,13 @@ public class VariantToBqUtilsTest {
     when(variantContext.getAlternateAlleles()).thenReturn(alternateList);
     List<TableRow> missingFieldTableRow = variantToBqUtils.getAlternateBases(variantContext);
     assertThat(missingFieldTableRow.get(0)
-        .get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isNull();
+        .get(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT)).isNull();
 
     // Test alt field has value "T".
     alternateList.add(altAllele);
     List<TableRow> altFieldTableRow = variantToBqUtils.getAlternateBases(variantContext);
     assertThat(altFieldTableRow.get(0)
-        .get(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT)).isEqualTo("T");
+        .get(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT)).isEqualTo("T");
   }
 
 
@@ -272,7 +272,7 @@ public class VariantToBqUtilsTest {
     // Mock alt field.
     List<TableRow> altMetadata = new ArrayList<>();
     altMetadata.add(new TableRow());
-    altMetadata.get(0).set(Constants.ColumnKeyConstants.ALTERNATE_BASES_ALT, TEST_ALTERNATE_BASES);
+    altMetadata.get(0).set(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT, TEST_ALTERNATE_BASES);
 
     TableRow row = new TableRow();
     variantToBqUtils.addInfo(row, variantContext, altMetadata, vcfHeader, 1);
@@ -304,10 +304,10 @@ public class VariantToBqUtilsTest {
     // Test table row fields.
     List<TableRow> calls = variantToBqUtils.getCalls(variantContext, vcfHeader);
     TableRow row = calls.get(0);
-    assertThat(row.get(Constants.ColumnKeyConstants.CALLS_NAME)).isEqualTo("sample");
-    assertThat(row.get(Constants.ColumnKeyConstants.CALLS_GENOTYPE))
+    assertThat(row.get(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME)).isEqualTo("sample");
+    assertThat(row.get(Constants.ColumnKeyNames.CALLS_GENOTYPE))
         .isEqualTo(Arrays.asList(1, 2));
-    assertThat(row.get(Constants.ColumnKeyConstants.CALLS_PHASESET)).isEqualTo("0");
+    assertThat(row.get(Constants.ColumnKeyNames.CALLS_PHASESET)).isEqualTo("0");
     // PS should not be in the info map, should be set in phase set
     assertThat(!row.containsKey("PS")).isTrue();
     assertThat(row.get("HQ")).isEqualTo(Arrays.asList(23, 27));
@@ -332,11 +332,11 @@ public class VariantToBqUtilsTest {
     // Test table row fields.
     List<TableRow> callsWithEmptyFields = variantToBqUtils.getCalls(variantContext, vcfHeader);
     TableRow rowWithEmptyFields = callsWithEmptyFields.get(0);
-    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_NAME))
+    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME))
         .isEqualTo(TEST_CALLS_NAME);
-    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_GENOTYPE))
+    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.CALLS_GENOTYPE))
         .isEqualTo(Arrays.asList(DEFAULT_GENOTYPE, DEFAULT_GENOTYPE));
-    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_PHASESET))
+    assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.CALLS_PHASESET))
         .isEqualTo(Constants.DEFAULT_PHASESET);
     assertThat(rowWithEmptyFields.get("HQ")).isEqualTo(Arrays.asList(null,null));
   }
