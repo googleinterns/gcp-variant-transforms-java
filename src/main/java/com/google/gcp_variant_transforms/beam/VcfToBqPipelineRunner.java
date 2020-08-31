@@ -30,8 +30,8 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
   private final VcfParser vcfParser;
   private final BigQueryRowGenerator bigQueryRowGenerator;
 
-  private final TupleTag<TableRow> VALID_VARIANT_TO_BQ_RECORD_TAG = new TupleTag<TableRow>() {};
-  private final TupleTag<String> MALFORMED_RECORD_ERROR_MESSAGE_TAG = new TupleTag<String>() {};
+  private final TupleTag<TableRow> VALID_VARIANT_TO_BQ_RECORD_TAG = new TupleTag<>() {};
+  private final TupleTag<String> MALFORMED_RECORD_ERROR_MESSAGE_TAG = new TupleTag<>() {};
 
   /** Implementation of {@link PipelineRunner} service. */
   @Inject
