@@ -16,22 +16,23 @@ import java.util.Set;
  */
 public interface VariantToBqUtils {
   /**
-   * Get reference allele bases. Set null in this field if there is a missing value.
+   * Get reference allele bases. Return null if there is a missing value.
    * @param variantContext
    * @return reference bases after handling missing value.
    */
   public String getReferenceBases(VariantContext variantContext);
 
   /**
-   * Get names from VariantContext's ID field. It should be a semi-colon separated list of unique identifiers
-   * where available. In each separated ID, set null in this field if there is missing value.
+   * Get names from VariantContext's ID field. It should be a semi-colon separated list of
+   * unique identifiers where available. In each separated ID, set null in this field if there is
+   * a missing value.
    * @param variantContext
    * @return List of names after handling missing value.
    */
   public List<String> getNames(VariantContext variantContext);
 
   /**
-   * Get alternate allele bases. Set null in this field if there is missing value.
+   * Get alternate allele bases. Return null if there is missing value.
    * @param variantContext
    * @return List of {@link TableRow} setting each alternate base in the alternate base field.
    */
@@ -40,15 +41,16 @@ public interface VariantToBqUtils {
   /**
    * Get filter set. If it is an empty set, it is required to add "PASS" in the filter.
    * @param variantContext
-   * @return Filter Set after handling "PASS" and missing value.
+   * @return Filter set after handling "PASS" and missing value.
    */
   public Set<String> getFilters(VariantContext variantContext);
 
   /**
    * Add variant Info field into BQ table row. For each field value, check if the value size
    * matches the count defined by VCFHeader and convert each value to the defined type.
-   * If the info field number in the VCF header is `A`, add it to the ALT sub field. The size for this field
-   * should be equal to the expected alternate bases count, which is the size of the alternate bases value.
+   * If the info field number in the VCF header is `A`, add it to the ALT sub field. The size for
+   * this field should be equal to the expected alternate bases count, which is the size of the
+   * alternate bases value.
    * @param row Base TableRow for the VariantContext.
    * @param variantContext
    * @param altMetadata List of TableRow in the alternate bases repeated field.
@@ -58,12 +60,12 @@ public interface VariantToBqUtils {
                       VCFHeader vcfHeader, int expectedAltCount);
 
   /**
-   * Add calls(samples) in the table row with {@link VCFHeader} defined value type and count.
+   * Get calls(samples) in the table row with {@link VCFHeader} defined value type and count.
    * @param variantContext
    * @param vcfHeader Provides value type and count format.
    * @return List of TableRow in the calls repeated field in the TableRow.
    */
-  public List<TableRow> addCalls(VariantContext variantContext, VCFHeader vcfHeader);
+  public List<TableRow> getCalls(VariantContext variantContext, VCFHeader vcfHeader);
 
   /**
    * <p>
@@ -74,7 +76,7 @@ public interface VariantToBqUtils {
    * </p>
    *
    * <p>
-   *  Notice that there are some field values that contains ',' but have not been parsed by HTSJDK,
+   *  Notice that there are some fields that contains ',' but have not been parsed by HTSJDK,
    *  eg: "HQ" ->"23,27", we need to split it to list of String and call the convert function.
    * </p>
    * @param value Raw value in VariantContext.
@@ -113,8 +115,8 @@ public interface VariantToBqUtils {
   /**
    * <p>
    *  Move fields in INFO field that number = `A` defined in the VCFHeader to alternate_bases
-   *  nested field, since those field count is related to the alternate bases. The alternate bases
-   *  field could have repeated subfields with alternate names and fields with number = 'A'.
+   *  nested field, since those field count is related to the alternate bases. The alternate
+   *  bases field could have repeated subfields with alternate names and fields with number = 'A'.
    * </p>
    *
    * <p>

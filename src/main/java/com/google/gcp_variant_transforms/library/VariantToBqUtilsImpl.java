@@ -82,35 +82,38 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
         VCFInfoHeaderLine infoMetadata = vcfHeader.getInfoHeaderLine(attrName);
         VCFHeaderLineType infoType = infoMetadata.getType();
         VCFHeaderLineCount infoCountType = infoMetadata.getCountType();
-        if (infoCountType == VCFHeaderLineCount.A || infoCountType == VCFHeaderLineCount.R) {
-          // If alternate field is ".", alternate alleles will be empty, expected count will be 1.
-          if (infoCountType == VCFHeaderLineCount.A) {
+        if (infoCountType == VCFHeaderLineCount.A) {
             // Put this info into ALT field.
-            splitAlternateAlleleInfoFields(attrName, value, altMetadata, infoType, expectedAltCount);
-          } else {
-            // field count should count all alleles, which is expectedAltCount plus reference.
-            row.set(attrName, convertToDefinedType(value, infoType, expectedAltCount + 1));
-          }
+            splitAlternateAlleleInfoFields(attrName, value, altMetadata, infoType,
+                expectedAltCount);
+        } else if (infoCountType == VCFHeaderLineCount.R) {
+          // field count should count all alleles, which is expectedAltCount plus reference.
+          row.set(attrName, convertToDefinedType(value, infoType, expectedAltCount + 1));
         } else if (infoCountType == VCFHeaderLineCount.INTEGER){
           row.set(attrName, convertToDefinedType(value, infoType, infoMetadata.getCount()));
         } else {
-          // infoCountType is 'G' or '.', which we pass default count and we do not check if the count matches the
-          // expected count.
+          // infoCountType is 'G' or '.', which we pass default count and we do not check if the
+          // count matches the expected count.
           row.set(attrName, convertToDefinedType(value, infoType, Constants.DEFAULT_FIELD_COUNT));
         }
       }
     }
   }
 
-  public List<TableRow> addCalls(VariantContext variantContext, VCFHeader vcfHeader) {
+  public List<TableRow> getCalls(VariantContext variantContext, VCFHeader vcfHeader) {
     GenotypesContext genotypes = variantContext.getGenotypes();
     List<TableRow> callRows = new ArrayList<>();
+    List<String> headerSampleNames = vcfHeader.getSampleNamesInOrder();
+    if (headerSampleNames.size() != genotypes.size()) {
+      throw new CountNotMatchException("Genotype samples size does not match the sample names " +
+          "defined in VCFHeader");
+    }
     for (Genotype genotype : genotypes) {
-      TableRow curRow = new TableRow();
-      curRow.set(Constants.ColumnKeyConstants.CALLS_NAME, genotype.getSampleName());
-      addFormatAndPhaseSet(curRow, genotype, vcfHeader);
-      addGenotypes(curRow, genotype.getAlleles(), variantContext);
-      callRows.add(curRow);
+      TableRow call = new TableRow();
+      call.set(Constants.ColumnKeyConstants.CALLS_NAME, genotype.getSampleName());
+      addFormatAndPhaseSet(call, genotype, vcfHeader);
+      addGenotypes(call, genotype.getAlleles(), variantContext);
+      callRows.add(call);
     }
     return callRows;
   }
@@ -124,8 +127,8 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
         return convertToDefinedType(Arrays.asList(valueStr.split(",")), type, count);
       } else if (count > 1) {
         // value is a single value but count > 1, it should raise an exception
-        throw new CountNotMatchException("Value \"" + value + "\" size does not match the count defined by " +
-            "VCFHeader");
+        throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
+            "defined by VCFHeader");
       } else {
         return convertSingleObjectToDefinedType(value, type);
       }
@@ -133,8 +136,8 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
       // Deal with list of values.
       List<Object> valueList = (List<Object>)value;
       if (count != Constants.DEFAULT_FIELD_COUNT && count != valueList.size()) {
-        throw new CountNotMatchException("Value \"" + value + "\" size does not match the count defined by " +
-            "VCFHeader");
+        throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
+            "defined by VCFHeader");
       }
       List<Object> convertedList = new ArrayList<>();
       for (Object val : valueList) {
@@ -152,7 +155,8 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     }
 
     String valueStr = (String)value;
-    valueStr = valueStr.trim();   // For cases like " 27", ignore the space in list element.
+    // For cases like " 27", ignore the space in list element.
+    valueStr = valueStr.trim();
     if (valueStr.equals(VCFConstants.MISSING_VALUE_v4)) {
       return null;
     }
@@ -192,8 +196,10 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
       }
       if (genotype.hasAnyAttribute(fieldName)) {
         Object value = genotype.getAnyAttribute(fieldName);
-        if (fieldName.equals(VCFConstants.GENOTYPE_ALLELE_DEPTHS) || fieldName.equals(VCFConstants.DEPTH_KEY) ||
-            fieldName.equals(VCFConstants.GENOTYPE_QUALITY_KEY) || fieldName.equals(VCFConstants.GENOTYPE_PL_KEY)) {
+        if (fieldName.equals(VCFConstants.GENOTYPE_ALLELE_DEPTHS) ||
+            fieldName.equals(VCFConstants.DEPTH_KEY) ||
+            fieldName.equals(VCFConstants.GENOTYPE_QUALITY_KEY) ||
+            fieldName.equals(VCFConstants.GENOTYPE_PL_KEY)) {
           // These four field values have been pre-processed in Genotype.
           row.set(fieldName, value);
         } else if (fieldName.equals(VCFConstants.PHASE_SET_KEY)) {
@@ -208,8 +214,8 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
             row.set(fieldName, convertToDefinedType(genotype.getAnyAttribute(fieldName),
                 formatType, formatMetadata.getCount()));
           } else {
-            // If field number in the VCFHeader is ".", should pass a default count and do not check if count is equal
-            // to the size of value.
+            // If field number in the VCFHeader is ".", should pass a default count and do not
+            // check if count is equal to the size of value.
             row.set(fieldName, convertToDefinedType(genotype.getAnyAttribute(fieldName),
                 formatType, Constants.DEFAULT_FIELD_COUNT));
           }
@@ -230,8 +236,8 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     if (value instanceof List) {
       List<Object> valList = (List<Object>)value;
       if (count != valList.size()) {
-        throw new CountNotMatchException("Value \"" + value + "\" size does not match the count defined by " +
-            "VCFHeader");
+        throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
+            "defined by VCFHeader");
       }
       for (int i = 0; i < valList.size(); ++i) {
         if (i >= altMetadata.size()) {

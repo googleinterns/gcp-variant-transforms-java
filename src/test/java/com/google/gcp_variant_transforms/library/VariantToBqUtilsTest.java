@@ -123,7 +123,8 @@ public class VariantToBqUtilsTest {
     when(HQMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
     when(HQMetadata.getCount()).thenReturn(2);
 
-    when(vcfHeader.getFormatHeaderLines()).thenReturn(Arrays.asList(GTMetadata, DPMetadata, PSMetadata, HQMetadata));
+    when(vcfHeader.getFormatHeaderLines()).thenReturn(Arrays.asList(GTMetadata, DPMetadata,
+        PSMetadata, HQMetadata));
   }
 
   /**
@@ -220,7 +221,8 @@ public class VariantToBqUtilsTest {
   @Test
   public void testGetNames_whenComparingElement_thenTrue() {
     when(variantContext.getID()).thenReturn(TEST_ID);
-    assertThat(variantToBqUtils.getNames(variantContext)).isEqualTo(Collections.singletonList(TEST_ID));
+    assertThat(variantToBqUtils.getNames(variantContext))
+        .isEqualTo(Collections.singletonList(TEST_ID));
 
     // Test ID with semi-colon:
     when(variantContext.getID()).thenReturn(TEST_ID_WITH_SEMI_COLON);
@@ -229,8 +231,8 @@ public class VariantToBqUtilsTest {
 
     // Test empty fields.
     when(variantContext.getID()).thenReturn(VCFConstants.MISSING_VALUE_v4);
-    assertThat(variantToBqUtils.getNames(variantContext)).isEqualTo(Collections.singletonList(null));
-
+    assertThat(variantToBqUtils.getNames(variantContext))
+        .isEqualTo(Collections.singletonList(null));
   }
 
   @Test
@@ -300,10 +302,11 @@ public class VariantToBqUtilsTest {
   @Test
   public void testAddCallsWithFieldValue_whenCheckingGenotypeElements_thenTrue() {
     // Test table row fields.
-    List<TableRow> calls = variantToBqUtils.addCalls(variantContext, vcfHeader);
+    List<TableRow> calls = variantToBqUtils.getCalls(variantContext, vcfHeader);
     TableRow row = calls.get(0);
     assertThat(row.get(Constants.ColumnKeyConstants.CALLS_NAME)).isEqualTo("sample");
-    assertThat(row.get(Constants.ColumnKeyConstants.CALLS_GENOTYPE)).isEqualTo(Arrays.asList(1, 2));
+    assertThat(row.get(Constants.ColumnKeyConstants.CALLS_GENOTYPE))
+        .isEqualTo(Arrays.asList(1, 2));
     assertThat(row.get(Constants.ColumnKeyConstants.CALLS_PHASESET)).isEqualTo("0");
     // PS should not be in the info map, should be set in phase set
     assertThat(!row.containsKey("PS")).isTrue();
@@ -319,7 +322,7 @@ public class VariantToBqUtilsTest {
     when(sample.getAlleles()).thenReturn(Arrays.asList(firstGenotypeAllele, secondGenotypeAllele));
 
     // Mock empty info fields.
-    when(sample.hasAnyAttribute(VCFConstants.PHASE_SET_KEY)).thenReturn(false); // No phase set presented.
+    when(sample.hasAnyAttribute(VCFConstants.PHASE_SET_KEY)).thenReturn(false);
     when(sample.getAnyAttribute(VCFConstants.HAPLOTYPE_QUALITY_KEY)).thenReturn(".,.");
 
     // Add sample to genotypeContext.
@@ -327,7 +330,7 @@ public class VariantToBqUtilsTest {
     when(genotypesContext.iterator().next()).thenReturn(sample);
 
     // Test table row fields.
-    List<TableRow> callsWithEmptyFields = variantToBqUtils.addCalls(variantContext, vcfHeader);
+    List<TableRow> callsWithEmptyFields = variantToBqUtils.getCalls(variantContext, vcfHeader);
     TableRow rowWithEmptyFields = callsWithEmptyFields.get(0);
     assertThat(rowWithEmptyFields.get(Constants.ColumnKeyConstants.CALLS_NAME))
         .isEqualTo(TEST_CALLS_NAME);
