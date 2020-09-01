@@ -12,8 +12,11 @@ import com.google.gcp_variant_transforms.common.Constants;
 import com.google.gcp_variant_transforms.TestEnv;
 import com.google.guiceberry.junit4.GuiceBerryRule;
 import com.google.inject.Inject;
-import htsjdk.variant.vcf.*;
-
+import htsjdk.variant.vcf.VCFCodec;
+import htsjdk.variant.vcf.VCFFormatHeaderLine;
+import htsjdk.variant.vcf.VCFHeaderLineType;
+import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -21,8 +24,6 @@ import java.util.Scanner;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import javax.xml.validation.Schema;
 
 /**
  * Units tests for SchemaGeneratorImpl.java
