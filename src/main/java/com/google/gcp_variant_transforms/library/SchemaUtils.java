@@ -39,7 +39,7 @@ public class SchemaUtils {
 
   public static class FieldDescription {
     public static final String REFERENCE_NAME = "Reference name.";
-    public static final String START_POSITION = "Start position (1-based). Corresponds to the " +
+    public static final String START_POSITION = "Start position (0-based). Corresponds to the " +
         "first base of the string of reference bases.";
     public static final String END_POSITION = "End position. Corresponds to the first base " +
         "after the last base in the reference allele.";
@@ -161,8 +161,8 @@ public class SchemaUtils {
           put(VCFHeaderLineType.String, BQFieldType.STRING);
           put(VCFHeaderLineType.Float, BQFieldType.FLOAT);
           put(VCFHeaderLineType.Integer, BQFieldType.INTEGER);
+          put(VCFHeaderLineType.Flag, BQFieldType.BOOLEAN);
   }};
-
 
   /**
    * Returns the sanitized field name according to BigQuery restrictions.

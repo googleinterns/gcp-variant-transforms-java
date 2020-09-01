@@ -59,8 +59,8 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    */
   protected TableFieldSchema createField(VCFHeader vcfHeader, String fieldName){
     TableFieldSchema field;
-    if (fieldName == Constants.ColumnKeyNames.ALTERNATE_BASES ||
-        fieldName == Constants.ColumnKeyNames.CALLS) {
+    if (fieldName.equals(Constants.ColumnKeyNames.ALTERNATE_BASES) ||
+        fieldName.equals(Constants.ColumnKeyNames.CALLS)) {
       field = createRecordField(vcfHeader, fieldName);
     } else {
         field = new TableFieldSchema()
@@ -89,8 +89,8 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
         .setName(fieldName)
         .setDescription(SchemaUtils.constantFieldNameToDescriptionMap.get(fieldName))
         .setMode(SchemaUtils.constantFieldNameToModeMap.get(fieldName))
-        .setFields(subFields)
-        .setType(SchemaUtils.constantFieldNameToTypeMap.get(fieldName));
+        .setType(SchemaUtils.constantFieldNameToTypeMap.get(fieldName))
+        .setFields(subFields);
   }
 
   /**
@@ -100,10 +100,15 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    */
   @VisibleForTesting
   protected TableFieldSchema convertCompoundHeaderLineToField(VCFCompoundHeaderLine headerLine) {
+    String bqFieldMode = SchemaUtils.BQFieldMode.REPEATED; // Number = A, R, G, or >1
+    if (headerLine.getCountType() == VCFHeaderLineCount.INTEGER &&
+        headerLine.getCount() <= 1){
+      bqFieldMode = SchemaUtils.BQFieldMode.NULLABLE;
+    }
     return new TableFieldSchema()
         .setName(SchemaUtils.getSanitizedFieldName(headerLine.getID()))
         .setDescription(headerLine.getDescription())
-        .setMode(SchemaUtils.BQFieldMode.NULLABLE) // Always NULLABLE
+        .setMode(bqFieldMode)
         .setType(SchemaUtils.HTSJDKTypeToBQTypeMap.get(headerLine.getType()));
   }
 
@@ -116,8 +121,8 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
   protected ImmutableList<TableFieldSchema> getCallSubFields(VCFHeader vcfHeader) {
     ImmutableList.Builder<TableFieldSchema> callSubFields =
         new ImmutableList.Builder<TableFieldSchema>();
-    Collection<String> fieldNames = SchemaUtils.callsSubFieldIndexToNameMap.values();
-    for (String fieldName : fieldNames) {
+    Collection<String> callFieldNames = SchemaUtils.callsSubFieldIndexToNameMap.values();
+    for (String fieldName : callFieldNames) {
       TableFieldSchema callSubField = new TableFieldSchema()
           .setName(fieldName)
           .setDescription(SchemaUtils.callSubFieldNameToDescriptionMap.get(fieldName))
@@ -127,7 +132,11 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
     }
     // Adds the FORMAT fields under the Calls record
     for (VCFFormatHeaderLine formatHeaderLine : vcfHeader.getFormatHeaderLines()){
-        callSubFields.add(convertCompoundHeaderLineToField(formatHeaderLine));
+        // Phaseset and Genotype are already added to callSubFields
+        String callSubFieldName = formatHeaderLine.getID();
+        if (!callSubFieldName.equals("GT") && !callSubFieldName.equals("PS")) {
+          callSubFields.add(convertCompoundHeaderLineToField(formatHeaderLine));
+        }
       }
     return callSubFields.build();
   }
