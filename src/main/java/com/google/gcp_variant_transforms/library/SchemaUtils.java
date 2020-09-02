@@ -3,6 +3,9 @@
 package com.google.gcp_variant_transforms.library;
 
 import com.google.gcp_variant_transforms.common.Constants;
+import htsjdk.variant.vcf.VCFConstants;
+import htsjdk.variant.vcf.VCFHeaderLineType;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -13,15 +16,20 @@ import java.util.stream.Stream;
  */
 public class SchemaUtils {
 
+  // Prefix for BQ field names that do not start with alpha characters
+  public static String FALLBACK_FIELD_NAME_PREFIX = "field_";
+
   public static class FieldIndex {
     public static final int REFERENCE_NAME = 0;
     public static final int START_POSITION = 1;
     public static final int END_POSITION = 2;
     public static final int REFERENCE_BASES = 3;
-    public static final int NAMES = 4;
-    public static final int QUALITY = 5;
-    public static final int FILTER = 6;
-    public static final int CALLS = 7;
+    public static final int ALTERNATE_BASES = 4;
+    public static final int ALTERNATE_BASES_ALT = 0; // Field under ALTERNATE_BASES record.
+    public static final int NAMES = 5;
+    public static final int QUALITY = 6;
+    public static final int FILTER = 7;
+    public static final int CALLS = 8;
 
     // Indices of the Call sub-Field list.
     public static final int CALLS_SAMPLE_NAME = 0;
@@ -31,11 +39,13 @@ public class SchemaUtils {
 
   public static class FieldDescription {
     public static final String REFERENCE_NAME = "Reference name.";
-    public static final String START_POSITION = "Start position (1-based). Corresponds to the " +
+    public static final String START_POSITION = "Start position (0-based). Corresponds to the " +
         "first base of the string of reference bases.";
     public static final String END_POSITION = "End position. Corresponds to the first base " +
         "after the last base in the reference allele.";
     public static final String REFERENCE_BASES = "Reference bases.";
+    public static final String ALTERNATE_BASES = "One record for each alternate base (if any).";
+    public static final String ALTERNATE_BASES_ALT = "Alternate base.";
     public static final String NAMES = "Variant names (e.g. RefSNP ID).";
     public static final String QUALITY = "Phred-scaled quality score (-10log10 prob(call " +
         "is wrong)). Higher values imply better quality.";
@@ -71,6 +81,7 @@ public class SchemaUtils {
     put(FieldIndex.START_POSITION, Constants.ColumnKeyNames.START_POSITION);
     put(FieldIndex.END_POSITION, Constants.ColumnKeyNames.END_POSITION);
     put(FieldIndex.REFERENCE_BASES, Constants.ColumnKeyNames.REFERENCE_BASES);
+    put(FieldIndex.ALTERNATE_BASES, Constants.ColumnKeyNames.ALTERNATE_BASES);
     put(FieldIndex.NAMES, Constants.ColumnKeyNames.NAMES);
     put(FieldIndex.QUALITY, Constants.ColumnKeyNames.QUALITY);
     put(FieldIndex.FILTER, Constants.ColumnKeyNames.FILTER);
@@ -90,6 +101,7 @@ public class SchemaUtils {
       {Constants.ColumnKeyNames.START_POSITION, FieldDescription.START_POSITION},
       {Constants.ColumnKeyNames.END_POSITION, FieldDescription.END_POSITION},
       {Constants.ColumnKeyNames.REFERENCE_BASES, FieldDescription.REFERENCE_BASES},
+      {Constants.ColumnKeyNames.ALTERNATE_BASES, FieldDescription.ALTERNATE_BASES},
       {Constants.ColumnKeyNames.NAMES, FieldDescription.NAMES},
       {Constants.ColumnKeyNames.QUALITY, FieldDescription.QUALITY},
       {Constants.ColumnKeyNames.FILTER, FieldDescription.FILTER},
@@ -109,6 +121,7 @@ public class SchemaUtils {
       {Constants.ColumnKeyNames.START_POSITION, BQFieldMode.NULLABLE},
       {Constants.ColumnKeyNames.END_POSITION, BQFieldMode.NULLABLE},
       {Constants.ColumnKeyNames.REFERENCE_BASES, BQFieldMode.NULLABLE},
+      {Constants.ColumnKeyNames.ALTERNATE_BASES, BQFieldMode.REPEATED},
       {Constants.ColumnKeyNames.NAMES, BQFieldMode.REPEATED},
       {Constants.ColumnKeyNames.QUALITY, BQFieldMode.NULLABLE},
       {Constants.ColumnKeyNames.FILTER, BQFieldMode.REPEATED},
@@ -128,6 +141,7 @@ public class SchemaUtils {
       {Constants.ColumnKeyNames.START_POSITION, BQFieldType.INTEGER},
       {Constants.ColumnKeyNames.END_POSITION, BQFieldType.INTEGER},
       {Constants.ColumnKeyNames.REFERENCE_BASES, BQFieldType.STRING},
+      {Constants.ColumnKeyNames.ALTERNATE_BASES, BQFieldType.RECORD},
       {Constants.ColumnKeyNames.NAMES, BQFieldType.STRING},
       {Constants.ColumnKeyNames.QUALITY, BQFieldType.FLOAT},
       {Constants.ColumnKeyNames.FILTER, BQFieldType.STRING},
@@ -140,4 +154,36 @@ public class SchemaUtils {
       {Constants.ColumnKeyNames.CALLS_GENOTYPE, BQFieldType.INTEGER},
       {Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, BQFieldType.STRING}, //verify
       }).collect(Collectors.toMap(mapData -> mapData[0], mapData -> mapData[1]));
+
+  // Maps the HTSJDK HeaderLine types to BQ Field types
+  public static Map<VCFHeaderLineType, String> HTSJDKTypeToBQTypeMap =
+      new HashMap<VCFHeaderLineType, String>() {{
+          put(VCFHeaderLineType.String, BQFieldType.STRING);
+          put(VCFHeaderLineType.Float, BQFieldType.FLOAT);
+          put(VCFHeaderLineType.Integer, BQFieldType.INTEGER);
+          put(VCFHeaderLineType.Flag, BQFieldType.BOOLEAN);
+  }};
+
+  // Maps VCF Format IDs to Variant Transform's substitute names
+  public static Map<String, String> VCFFormatIDToVTNameMap =
+      new HashMap<String, String>() {{
+        put(VCFConstants.GENOTYPE_KEY, Constants.ColumnKeyNames.CALLS_GENOTYPE);
+        put(VCFConstants.PHASE_SET_KEY, Constants.ColumnKeyNames.CALLS_PHASESET);
+  }};
+
+  /**
+   * Returns the sanitized field name according to BigQuery restrictions.
+   *
+   * BigQuery field names must follow `[a-zA-Z][a-zA-Z0-9_]*`. This method
+   * converts any unsupported characters to an underscore. Also, if the first
+   * character does not match `[a-zA-z]`, it prepends `FALLBACK_FIELD_NAME_PREFIX`
+   * to the name.
+   * @param fieldName: Name of the field to sanitize
+   * @return sanitized field name
+   */
+  protected static String getSanitizedFieldName(String fieldName){
+    if (!Character.isLetter(fieldName.charAt(0)))
+      fieldName = SchemaUtils.FALLBACK_FIELD_NAME_PREFIX + fieldName;
+    return fieldName.replaceAll("[^a-zA-Z0-9_]", "_");
+  }
 }
