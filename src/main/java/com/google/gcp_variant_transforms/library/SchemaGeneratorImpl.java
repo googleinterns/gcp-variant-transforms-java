@@ -8,6 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.gcp_variant_transforms.common.Constants;
 import htsjdk.variant.vcf.VCFCompoundHeaderLine;
+import htsjdk.variant.vcf.VCFConstants;
 import htsjdk.variant.vcf.VCFFormatHeaderLine;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderLineCount;
@@ -133,7 +134,8 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
     for (VCFFormatHeaderLine formatHeaderLine : vcfHeader.getFormatHeaderLines()){
         // Phaseset and Genotype are already added to callSubFields
         String callSubFieldName = formatHeaderLine.getID();
-        if (!callSubFieldName.equals("GT") && !callSubFieldName.equals("PS")) {
+        if (!callSubFieldName.equals(VCFConstants.GENOTYPE_KEY)
+            && !callSubFieldName.equals(VCFConstants.PHASE_SET_KEY)) {
           callSubFields.add(convertCompoundHeaderLineToField(formatHeaderLine));
         }
       }

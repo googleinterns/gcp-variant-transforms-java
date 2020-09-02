@@ -24,12 +24,4 @@ public class Constants {
     public static final String CALLS_GENOTYPE = "genotype";
     public static final String CALLS_PHASESET = "phaseset";
   }
-
-  /**
-   * Commonly used VCF Format Header Line IDs
-   */
-  public static class VCFFormatIDNames {
-    public static final String CALLS_GENOTYPE = "GT";
-    public static final String CALLS_PHASESET = "PS";
-  }
 }

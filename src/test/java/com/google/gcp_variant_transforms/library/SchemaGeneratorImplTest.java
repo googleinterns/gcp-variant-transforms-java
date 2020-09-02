@@ -13,6 +13,7 @@ import com.google.gcp_variant_transforms.TestEnv;
 import com.google.guiceberry.junit4.GuiceBerryRule;
 import com.google.inject.Inject;
 import htsjdk.variant.vcf.VCFCodec;
+import htsjdk.variant.vcf.VCFConstants;
 import htsjdk.variant.vcf.VCFFormatHeaderLine;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderLineType;
@@ -378,9 +379,9 @@ public class SchemaGeneratorImplTest {
     assertThat(callsSubFields.size()).isEqualTo(expectedSize);
     for (TableFieldSchema subField: callsSubFields){
       // Field already added under the name "genotype".
-      assertThat(subField.getName()).isNotEqualTo(Constants.VCFFormatIDNames.CALLS_GENOTYPE);
+      assertThat(subField.getName()).isNotEqualTo(VCFConstants.GENOTYPE_KEY);
       // Field already added under the name "phaseset".
-      assertThat(subField.getName()).isNotEqualTo(Constants.VCFFormatIDNames.CALLS_PHASESET);
+      assertThat(subField.getName()).isNotEqualTo(VCFConstants.PHASE_SET_KEY);
     }
   }
 
