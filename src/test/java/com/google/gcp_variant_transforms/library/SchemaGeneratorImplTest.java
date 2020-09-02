@@ -14,8 +14,8 @@ import com.google.guiceberry.junit4.GuiceBerryRule;
 import com.google.inject.Inject;
 import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFormatHeaderLine;
-import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -364,7 +364,10 @@ public class SchemaGeneratorImplTest {
         "PS", 1, VCFHeaderLineType.String, "description"));
     TableFieldSchema callsField = schemaGen.createRecordField(sampleVcfHeader, fieldName);
     List<TableFieldSchema> callsSubFields = callsField.getFields();
-    int expectedSize = 7; // 3 constants fields and 4 added from sample v4.2 header
+    // 3 constants fields and 5 added from sample v4.2 header:
+    // 'GQ', 'DP', 'HP', 'GL'
+    // and 'PL' added by HTSJDK because of 'GL'.
+    int expectedSize = 8;
 
     TableFieldSchema genotype = callsSubFields.get(SchemaUtils.FieldIndex.CALLS_GENOTYPE);
     assertThat(genotype.getName()).isEqualTo(Constants.ColumnKeyNames.CALLS_GENOTYPE);
@@ -372,13 +375,12 @@ public class SchemaGeneratorImplTest {
     assertThat(genotype.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
     assertThat(genotype.getType()).isEqualTo(SchemaUtils.BQFieldType.INTEGER);
 
-    System.out.println(callsSubFields.size());
-    // assertThat(callsSubFields.size()).isEqualTo(expectedSize);
+    assertThat(callsSubFields.size()).isEqualTo(expectedSize);
     for (TableFieldSchema subField: callsSubFields){
-      System.out.println(subField.getName());
-      System.out.println(subField.getDescription());
-      // assertThat(subField.getName()).isNotEqualTo("GT"); // Added as name "genotype"
-      // assertThat(subField.getName()).isNotEqualTo("PS"); // Added as name "phaseset"
+      // Field already added under the name "genotype".
+      assertThat(subField.getName()).isNotEqualTo(Constants.VCFFormatIDNames.CALLS_GENOTYPE);
+      // Field already added under the name "phaseset".
+      assertThat(subField.getName()).isNotEqualTo(Constants.VCFFormatIDNames.CALLS_PHASESET);
     }
   }
 
@@ -410,6 +412,48 @@ public class SchemaGeneratorImplTest {
     assertThat(alleleFrequency.getDescription()).isEqualTo(alleleFrequencyDescription);
     assertThat(alleleFrequency.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
     assertThat(alleleFrequency.getType()).isEqualTo(SchemaUtils.BQFieldType.FLOAT);
+  }
+
+  @Test
+  public void testConvertCompoundHeaderLineToField_whenFlag_thenIsEqualTo() {
+     String name = "sampleName";
+      String description = "sampleDescription";
+      VCFInfoHeaderLine infoHeaderLine = new VCFInfoHeaderLine(
+          name, 0, VCFHeaderLineType.Flag, description); // Number = 0
+      TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(infoHeaderLine);
+
+      assertThat(infoField.getName()).isEqualTo(name);
+      assertThat(infoField.getDescription()).isEqualTo(description);
+      assertThat(infoField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+      assertThat(infoField.getType()).isEqualTo(SchemaUtils.BQFieldType.BOOLEAN);
+  }
+
+  @Test
+  public void testConvertCompoundHeaderLineToField_whenRepeated_thenIsEqualTo() {
+    String name = "sampleName";
+    String description = "sampleDescription";
+    VCFInfoHeaderLine infoHeaderLine = new VCFInfoHeaderLine(
+        name, 2, VCFHeaderLineType.Integer, description); // Number > 1
+    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(infoHeaderLine);
+
+    assertThat(infoField.getName()).isEqualTo(name);
+    assertThat(infoField.getDescription()).isEqualTo(description);
+    assertThat(infoField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+    assertThat(infoField.getType()).isEqualTo(SchemaUtils.BQFieldType.INTEGER);
+  }
+
+  @Test
+  public void testConvertCompoundHeaderLineToField_whenNullable_thenIsEqualTo() {
+    String name = "sampleName";
+    String description = "sampleDescription";
+    VCFInfoHeaderLine infoHeaderLine = new VCFInfoHeaderLine(
+        name, 1, VCFHeaderLineType.Integer, description); // Number = 1
+    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(infoHeaderLine);
+
+    assertThat(infoField.getName()).isEqualTo(name);
+    assertThat(infoField.getDescription()).isEqualTo(description);
+    assertThat(infoField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(infoField.getType()).isEqualTo(SchemaUtils.BQFieldType.INTEGER);
   }
 
   @Test

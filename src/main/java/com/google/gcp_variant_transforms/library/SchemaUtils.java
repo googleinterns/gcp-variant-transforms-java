@@ -4,7 +4,6 @@ package com.google.gcp_variant_transforms.library;
 
 import com.google.gcp_variant_transforms.common.Constants;
 import htsjdk.variant.vcf.VCFHeaderLineType;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -162,6 +161,13 @@ public class SchemaUtils {
           put(VCFHeaderLineType.Float, BQFieldType.FLOAT);
           put(VCFHeaderLineType.Integer, BQFieldType.INTEGER);
           put(VCFHeaderLineType.Flag, BQFieldType.BOOLEAN);
+  }};
+
+  // Maps VCF Format IDs to Variant Transform's substitute names
+  public static Map<String, String> VCFFormatIDToVTNameMap =
+      new HashMap<String, String>() {{
+        put(Constants.VCFFormatIDNames.CALLS_GENOTYPE, Constants.ColumnKeyNames.CALLS_GENOTYPE);
+        put(Constants.VCFFormatIDNames.CALLS_PHASESET, Constants.ColumnKeyNames.CALLS_PHASESET);
   }};
 
   /**

@@ -21,9 +21,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
   
   public TableSchema getSchema(VCFHeader vcfHeader) {
     ImmutableList<TableFieldSchema> schemaFields = getFields(vcfHeader);
-    TableSchema schema = new TableSchema()
-        .setFields(schemaFields);
-    return schema;
+    return new TableSchema().setFields(schemaFields);
   }
 
   /**
@@ -33,7 +31,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    */
   @VisibleForTesting
   protected ImmutableList<TableFieldSchema> getFields(VCFHeader vcfHeader) {
-    ImmutableList.Builder<TableFieldSchema> fields = new ImmutableList.Builder<TableFieldSchema>();
+    ImmutableList.Builder<TableFieldSchema> fields = new ImmutableList.Builder<>();
     Collection<String> constantFieldNames = SchemaUtils.constantFieldIndexToNameMap.values();
 
     // Adds constant fields and records.
@@ -57,6 +55,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * @param fieldName
    * @return field
    */
+  @VisibleForTesting
   protected TableFieldSchema createField(VCFHeader vcfHeader, String fieldName){
     TableFieldSchema field;
     if (fieldName.equals(Constants.ColumnKeyNames.ALTERNATE_BASES) ||
@@ -81,7 +80,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
   @VisibleForTesting
   protected TableFieldSchema createRecordField(VCFHeader vcfHeader, String fieldName) {
     ImmutableList<TableFieldSchema> subFields;
-    if (fieldName == Constants.ColumnKeyNames.ALTERNATE_BASES) {
+    if (fieldName.equals(Constants.ColumnKeyNames.ALTERNATE_BASES)) {
       subFields = getAltSubFields(vcfHeader);
     } else { subFields = getCallSubFields(vcfHeader); } // Call record
 
@@ -120,7 +119,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
   @VisibleForTesting
   protected ImmutableList<TableFieldSchema> getCallSubFields(VCFHeader vcfHeader) {
     ImmutableList.Builder<TableFieldSchema> callSubFields =
-        new ImmutableList.Builder<TableFieldSchema>();
+        new ImmutableList.Builder<>();
     Collection<String> callFieldNames = SchemaUtils.callsSubFieldIndexToNameMap.values();
     for (String fieldName : callFieldNames) {
       TableFieldSchema callSubField = new TableFieldSchema()
@@ -149,7 +148,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
   @VisibleForTesting
   protected ImmutableList<TableFieldSchema> getAltSubFields(VCFHeader vcfHeader) {
     ImmutableList.Builder<TableFieldSchema> altSubFields =
-        new ImmutableList.Builder<TableFieldSchema>();
+        new ImmutableList.Builder<>();
     // Adds the alternate bases allele column.
     TableFieldSchema altSubField = new TableFieldSchema()
         .setName(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT)
