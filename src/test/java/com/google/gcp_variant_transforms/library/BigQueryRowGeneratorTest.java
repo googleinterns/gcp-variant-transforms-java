@@ -12,6 +12,7 @@ import com.google.guiceberry.junit4.GuiceBerryRule;
 import com.google.inject.Inject;
 import htsjdk.samtools.util.IOUtil;
 import htsjdk.variant.vcf.VCFCodec;
+import htsjdk.variant.vcf.VCFConstants;
 import htsjdk.variant.vcf.VCFHeader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,8 +41,8 @@ public class BigQueryRowGeneratorTest {
   private static final String TEST_ALTERNATE_BASES = "A";
   private static final String TEST_CALLS_NAME = "NA00003";
   private static final String DEFAULT_PHASE_SET = "*";
-  private static final boolean TEST_DB = true;
-  private static final boolean TEST_H2 = true;
+  private static final boolean TEST_FLAG_PRESENT = true;
+  private static final boolean TEST_FLAG_NOT_PRESENT = false;
   private static final double TEST_AF = 0.5;
   private static final double UNKNOWN_QUALITY = -10;
   private static final int TEST_START = 14370;
@@ -116,12 +117,14 @@ public class BigQueryRowGeneratorTest {
     TableRow altBase = altMetadata.get(0);
     assertThat(altBase.get(Constants.ColumnKeyNames.ALTERNATE_BASES_ALT))
         .isEqualTo(TEST_ALTERNATE_BASES);
-    assertThat(altBase.get("AF")).isEqualTo(TEST_AF);
+    assertThat(altBase.get(VCFConstants.ALLELE_FREQUENCY_KEY)).isEqualTo(TEST_AF);
 
-    assertThat(rowWithFieldValues.get("NS")).isEqualTo(TEST_NS);
-    assertThat(rowWithFieldValues.get("DP")).isEqualTo(TEST_DP);
-    assertThat(rowWithFieldValues.get("DB")).isEqualTo(TEST_DB);
-    assertThat(rowWithFieldValues.get("H2")).isEqualTo(TEST_H2);
+    assertThat(rowWithFieldValues.get(VCFConstants.SAMPLE_NUMBER_KEY)).isEqualTo(TEST_NS);
+    assertThat(rowWithFieldValues.get(VCFConstants.DEPTH_KEY)).isEqualTo(TEST_DP);
+    assertThat(rowWithFieldValues.get(VCFConstants.DBSNP_KEY)).isEqualTo(TEST_FLAG_PRESENT);
+
+    // For fields that type is "Flag", if it is not presented, it should be set as false.
+    assertThat(rowWithEmptyFields.get(VCFConstants.DBSNP_KEY)).isEqualTo(TEST_FLAG_NOT_PRESENT);
   }
 
   @Test
@@ -137,7 +140,8 @@ public class BigQueryRowGeneratorTest {
         .isEqualTo(DEFAULT_PHASE_SET);
     assertThat(rowWithMissingHQ.get(Constants.ColumnKeyNames.CALLS_GENOTYPE))
         .isEqualTo(Arrays.asList(TEST_GENOTYPE, TEST_GENOTYPE));
-    assertThat(rowWithMissingHQ.get("HQ")).isEqualTo(Arrays.asList(null, null));
+    assertThat(rowWithMissingHQ.get(VCFConstants.HAPLOTYPE_QUALITY_KEY))
+        .isEqualTo(Arrays.asList(null, null));
   }
 
   @Test
