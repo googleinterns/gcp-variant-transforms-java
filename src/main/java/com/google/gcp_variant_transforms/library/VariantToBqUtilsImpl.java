@@ -198,10 +198,10 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
       if (attrName.equals(VCFConstants.GENOTYPE_KEY)) {
         continue; // We will set GT field in a separate "genotype" field in BQ row.
       }
-      VCFFormatHeaderLine formatMetadata = vcfHeader.getFormatHeaderLine(attrName);
-      VCFHeaderLineType formatType = formatMetadata.getType();
       if (genotype.hasAnyAttribute(attrName)) {
         Object value = genotype.getAnyAttribute(attrName);
+        VCFFormatHeaderLine formatMetadata = vcfHeader.getFormatHeaderLine(attrName);
+        VCFHeaderLineType formatType = formatMetadata.getType();
         if (attrName.equals(VCFConstants.GENOTYPE_ALLELE_DEPTHS) ||
             attrName.equals(VCFConstants.DEPTH_KEY) ||
             attrName.equals(VCFConstants.GENOTYPE_QUALITY_KEY) ||
@@ -224,10 +224,6 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
                 formatType, Constants.DEFAULT_FIELD_COUNT));
           }
         }
-      } else if (formatType.equals(VCFHeaderLineType.Flag)) {
-        // If field is not presented in the VCF record and its field type is `Flag`, we need to
-        // set `false` in this field value.
-        row.set(attrName, false);
       }
     }
     if (phaseSet == null || !phaseSet.isEmpty()) {

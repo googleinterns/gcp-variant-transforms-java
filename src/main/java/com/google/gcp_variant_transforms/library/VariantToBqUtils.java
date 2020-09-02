@@ -46,11 +46,19 @@ public interface VariantToBqUtils {
   public Set<String> getFilters(VariantContext variantContext);
 
   /**
-   * Add variant Info field into BQ table row. For each field value, check if the value size
-   * matches the count defined by VCFHeader and convert each value to the defined type.
-   * If the info field number in the VCF header is `A`, add it to the ALT sub field. The size for
-   * this field should be equal to the expected alternate bases count, which is the size of the
-   * alternate bases value.
+   * <p>
+   *  Add variant Info field into BQ table row. For each field in the VCFHeader, check if the
+   *  field is presented. If the field type is `Flag` but not presented, it will set `false` in
+   *  the row field.
+   * </p>
+   *
+   * <p>
+   *  Also check if the field value size matches the count defined by VCFHeader and convert each
+   *  value to the defined type. If the info field number in the VCF header is `A`, add it to
+   *  the ALT sub field. The size for this field should be equal to the expected alternate bases
+   *  count, which is the size of the alternate bases value.
+   * </p>
+   *
    * @param row Base TableRow for the VariantContext.
    * @param variantContext
    * @param altMetadata List of TableRow in the alternate bases repeated field.
@@ -69,10 +77,10 @@ public interface VariantToBqUtils {
 
   /**
    * <p>
-   * Convert object value to the {@link VCFHeader} defined type and count.
-   * If the value size does not match the count in the VCFHeader, it should raise an exception.
-   * For list of values, for each value,call `convertSingleObjectToDefinedType` to convert value
-   * to defined type.
+   *  Convert object value to the {@link VCFHeader} defined type and count.
+   *  If the value size does not match the count in the VCFHeader, it should raise an exception.
+   *  For list of values, for each value,call `convertSingleObjectToDefinedType` to convert value
+   *  to defined type.
    * </p>
    *
    * <p>
