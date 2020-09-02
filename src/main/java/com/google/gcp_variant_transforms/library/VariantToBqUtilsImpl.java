@@ -77,10 +77,10 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     // Iterate all Info field in VCFHeader, if current record does not have the field, skip it.
     for (VCFInfoHeaderLine infoHeaderLine : vcfHeader.getInfoHeaderLines()) {
       String attrName = infoHeaderLine.getID();
+      VCFInfoHeaderLine infoMetadata = vcfHeader.getInfoHeaderLine(attrName);
+      VCFHeaderLineType infoType = infoMetadata.getType();
       if (variantContext.hasAttribute(attrName)) {
         Object value = variantContext.getAttribute(attrName);
-        VCFInfoHeaderLine infoMetadata = vcfHeader.getInfoHeaderLine(attrName);
-        VCFHeaderLineType infoType = infoMetadata.getType();
         VCFHeaderLineCount infoCountType = infoMetadata.getCountType();
         if (infoCountType == VCFHeaderLineCount.A) {
             // Put this info into ALT field.
@@ -96,6 +96,10 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
           // count matches the expected count.
           row.set(attrName, convertToDefinedType(value, infoType, Constants.DEFAULT_FIELD_COUNT));
         }
+      } else if (infoType.equals(VCFHeaderLineType.Flag)) {
+        // If field is not presented in the VCF record and its field type is `Flag`, we need to
+        // set `false` in this field value.
+        row.set(attrName, false);
       }
     }
   }
@@ -190,33 +194,33 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     String phaseSet = "";
     // Iterate all format fields in VCFHeader.
     for (VCFFormatHeaderLine formatHeaderLine : vcfHeader.getFormatHeaderLines()) {
-      String fieldName = formatHeaderLine.getID();
-      if (fieldName.equals(VCFConstants.GENOTYPE_KEY)) {
+      String attrName = formatHeaderLine.getID();
+      if (attrName.equals(VCFConstants.GENOTYPE_KEY)) {
         continue; // We will set GT field in a separate "genotype" field in BQ row.
       }
-      if (genotype.hasAnyAttribute(fieldName)) {
-        Object value = genotype.getAnyAttribute(fieldName);
-        if (fieldName.equals(VCFConstants.GENOTYPE_ALLELE_DEPTHS) ||
-            fieldName.equals(VCFConstants.DEPTH_KEY) ||
-            fieldName.equals(VCFConstants.GENOTYPE_QUALITY_KEY) ||
-            fieldName.equals(VCFConstants.GENOTYPE_PL_KEY)) {
+      if (genotype.hasAnyAttribute(attrName)) {
+        Object value = genotype.getAnyAttribute(attrName);
+        VCFFormatHeaderLine formatMetadata = vcfHeader.getFormatHeaderLine(attrName);
+        VCFHeaderLineType formatType = formatMetadata.getType();
+        if (attrName.equals(VCFConstants.GENOTYPE_ALLELE_DEPTHS) ||
+            attrName.equals(VCFConstants.DEPTH_KEY) ||
+            attrName.equals(VCFConstants.GENOTYPE_QUALITY_KEY) ||
+            attrName.equals(VCFConstants.GENOTYPE_PL_KEY)) {
           // These four field values have been pre-processed in Genotype.
-          row.set(fieldName, value);
-        } else if (fieldName.equals(VCFConstants.PHASE_SET_KEY)) {
+          row.set(attrName, value);
+        } else if (attrName.equals(VCFConstants.PHASE_SET_KEY)) {
           String phaseSetValue = genotype.getAnyAttribute(VCFConstants.PHASE_SET_KEY).toString();
           phaseSet = replaceMissingWithNull(phaseSetValue);
         } else {
           // The rest of fields need to be converted to the right type as VCFHeader specifies.
-          VCFFormatHeaderLine formatMetadata = vcfHeader.getFormatHeaderLine(fieldName);
-          VCFHeaderLineType formatType = formatMetadata.getType();
           VCFHeaderLineCount formatCountType = formatMetadata.getCountType();
           if (formatCountType == VCFHeaderLineCount.INTEGER) {
-            row.set(fieldName, convertToDefinedType(genotype.getAnyAttribute(fieldName),
+            row.set(attrName, convertToDefinedType(genotype.getAnyAttribute(attrName),
                 formatType, formatMetadata.getCount()));
           } else {
             // If field number in the VCFHeader is ".", should pass a default count and do not
             // check if count is equal to the size of value.
-            row.set(fieldName, convertToDefinedType(genotype.getAnyAttribute(fieldName),
+            row.set(attrName, convertToDefinedType(genotype.getAnyAttribute(attrName),
                 formatType, Constants.DEFAULT_FIELD_COUNT));
           }
         }

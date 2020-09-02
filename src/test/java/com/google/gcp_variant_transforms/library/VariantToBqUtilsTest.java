@@ -41,6 +41,8 @@ public class VariantToBqUtilsTest {
   private static final String TEST_REFERENCE_BASES = "G";
   private static final String TEST_ALTERNATE_BASES = "A";
   private static final String TEST_CALLS_NAME = "sample";
+  private static final boolean TEST_DB_PRESENT = true;
+  private static final boolean TEST_DB_NOT_PRESENT = false;
   private static final double TEST_AF = 0.333;
   private static final int TEST_NS = 2;
   private static final int DEFAULT_GENOTYPE = -1;
@@ -72,6 +74,7 @@ public class VariantToBqUtilsTest {
    * Mock VCF Header Lines:
    * ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
    * ##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
+   * ##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
    * ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
    * ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
    * ##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
@@ -91,7 +94,15 @@ public class VariantToBqUtilsTest {
     when(AFMetadata.getType()).thenReturn(VCFHeaderLineType.Float);
     when(AFMetadata.getCountType()).thenReturn(VCFHeaderLineCount.A);
 
-    when(vcfHeader.getInfoHeaderLines()).thenReturn(Arrays.asList(NSMetadata, AFMetadata));
+    VCFInfoHeaderLine DBMetadata = mock(VCFInfoHeaderLine.class);
+    when(vcfHeader.getInfoHeaderLine(VCFConstants.DBSNP_KEY)).thenReturn(DBMetadata);
+    when(DBMetadata.getID()).thenReturn(VCFConstants.DBSNP_KEY);
+    when(DBMetadata.getType()).thenReturn(VCFHeaderLineType.Flag);
+    when(DBMetadata.getCountType()).thenReturn(VCFHeaderLineCount.INTEGER);
+    when(DBMetadata.getCount()).thenReturn(0);
+
+    when(vcfHeader.getInfoHeaderLines()).thenReturn(Arrays.asList(NSMetadata,
+        AFMetadata, DBMetadata));
 
     // Mock VCF header in Calls.
     VCFFormatHeaderLine GTMetadata = mock(VCFFormatHeaderLine.class);
@@ -277,13 +288,36 @@ public class VariantToBqUtilsTest {
     TableRow row = new TableRow();
     variantToBqUtils.addInfo(row, variantContext, altMetadata, vcfHeader, 1);
 
-    assertThat(row.containsKey("NS")).isTrue();
-    assertThat(row.get("NS")).isEqualTo(TEST_NS);
+    assertThat(row.containsKey(VCFConstants.SAMPLE_NUMBER_KEY)).isTrue();
+    assertThat(row.get(VCFConstants.SAMPLE_NUMBER_KEY)).isEqualTo(TEST_NS);
 
     // AF field should not be in the info row, should be moved to alt field.
-    assertThat(!row.containsKey("AF")).isTrue();
-    assertThat(altMetadata.get(0).containsKey("AF")).isTrue();
-    assertThat(altMetadata.get(0).get("AF")).isEqualTo(TEST_AF);
+    assertThat(!row.containsKey(VCFConstants.ALLELE_FREQUENCY_KEY)).isTrue();
+    assertThat(altMetadata.get(0).containsKey(VCFConstants.ALLELE_FREQUENCY_KEY)).isTrue();
+    assertThat(altMetadata.get(0).get(VCFConstants.ALLELE_FREQUENCY_KEY)).isEqualTo(TEST_AF);
+  }
+
+  /**
+   * If there are fields that type is `Flag` but not presented, it should set `false`.
+   * Test field:
+   * DB, field type = Flag, test present and not present.
+   */
+  @Test
+  public void testAddInfo_FlagFieldNotPresent_whenCheckingElements_thenTrue() {
+    when(variantContext.hasAttribute(VCFConstants.DBSNP_KEY)).thenReturn(true);
+    when(variantContext.getAttribute(VCFConstants.DBSNP_KEY)).thenReturn(TEST_DB_PRESENT);
+
+    TableRow row = new TableRow();
+    List<TableRow> altMetadata = new ArrayList<>();
+    variantToBqUtils.addInfo(row, variantContext, altMetadata, vcfHeader, 0);
+
+    assertThat(row.containsKey(VCFConstants.DBSNP_KEY)).isTrue();
+    assertThat(row.get(VCFConstants.DBSNP_KEY)).isEqualTo(TEST_DB_PRESENT);
+    // Test DB not present
+    when(variantContext.hasAttribute(VCFConstants.DBSNP_KEY)).thenReturn(false);
+    variantToBqUtils.addInfo(row, variantContext, altMetadata, vcfHeader, 0);
+    assertThat(row.containsKey(VCFConstants.DBSNP_KEY)).isTrue();
+    assertThat(row.get(VCFConstants.DBSNP_KEY)).isEqualTo(TEST_DB_NOT_PRESENT);
   }
 
   /**
@@ -309,8 +343,8 @@ public class VariantToBqUtilsTest {
         .isEqualTo(Arrays.asList(1, 2));
     assertThat(row.get(Constants.ColumnKeyNames.CALLS_PHASESET)).isEqualTo("0");
     // PS should not be in the info map, should be set in phase set
-    assertThat(!row.containsKey("PS")).isTrue();
-    assertThat(row.get("HQ")).isEqualTo(Arrays.asList(23, 27));
+    assertThat(!row.containsKey(VCFConstants.PHASE_SET_KEY)).isTrue();
+    assertThat(row.get(VCFConstants.HAPLOTYPE_QUALITY_KEY)).isEqualTo(Arrays.asList(23, 27));
   }
 
   @Test
@@ -338,6 +372,7 @@ public class VariantToBqUtilsTest {
         .isEqualTo(Arrays.asList(DEFAULT_GENOTYPE, DEFAULT_GENOTYPE));
     assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.CALLS_PHASESET))
         .isEqualTo(Constants.DEFAULT_PHASESET);
-    assertThat(rowWithEmptyFields.get("HQ")).isEqualTo(Arrays.asList(null,null));
+    assertThat(rowWithEmptyFields.get(VCFConstants.HAPLOTYPE_QUALITY_KEY))
+        .isEqualTo(Arrays.asList(null,null));
   }
 }
