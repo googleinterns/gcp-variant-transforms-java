@@ -2,10 +2,7 @@
 
 package com.google.gcp_variant_transforms;
 
-import com.google.gcp_variant_transforms.library.SchemaGenerator;
-import com.google.gcp_variant_transforms.library.SchemaGeneratorImpl;
-import com.google.gcp_variant_transforms.library.VcfParser;
-import com.google.gcp_variant_transforms.library.VcfParserImpl;
+import com.google.gcp_variant_transforms.library.LibraryTestModule;
 import com.google.guiceberry.GuiceBerryModule;
 import com.google.inject.AbstractModule;
 
@@ -14,8 +11,6 @@ public class TestEnv extends AbstractModule {
   @Override
   protected void configure() {
     install(new GuiceBerryModule());
-
-    bind(VcfParser.class).to(VcfParserImpl.class);
-    bind(SchemaGenerator.class).to(SchemaGeneratorImpl.class);
+    install(new LibraryTestModule());
   }
 }
