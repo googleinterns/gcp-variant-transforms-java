@@ -12,16 +12,15 @@ import com.google.gcp_variant_transforms.options.VcfToBqContext;
 import com.google.gcp_variant_transforms.options.VcfToBqOptions;
 import htsjdk.variant.variantcontext.VariantContext;
 import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.transforms.Filter;
-import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionTuple;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.TupleTagList;
-import org.apache.beam.sdk.values.TypeDescriptors;
 
 public final class VcfToBqPipelineRunner implements PipelineRunner {
 
@@ -59,14 +58,14 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
                     TupleTagList.of(MALFORMED_RECORD_ERROR_MESSAGE_TAG)));
 
     PCollection<TableRow> validRowCollection = tableRowTuple.get(VALID_VARIANT_TO_BQ_RECORD_TAG);
-    PCollection<String> errorMessageCollection = tableRowTuple.get(MALFORMED_RECORD_ERROR_MESSAGE_TAG);
+    PCollection<String> errorMessageCollection =
+        tableRowTuple.get(MALFORMED_RECORD_ERROR_MESSAGE_TAG);
 
-    validRowCollection
-        .apply(MapElements
-            .into(TypeDescriptors.strings())
-            .via(
-                (TableRow tableRow) -> tableRow.toString()))
-        .apply(TextIO.write().to(context.getOutput()).withNoSpilling());
+    validRowCollection.apply("WriteTableRowToBigQuery",
+        BigQueryIO.writeTableRows().to(context.getOutput())
+            .withSchema(context.getBqSchema())
+            .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
+            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
 
     errorMessageCollection
         .apply(TextIO.write().to(context.getMalformedRecordsMessagePath()).withNoSpilling());

@@ -411,7 +411,7 @@ public class SchemaGeneratorImplTest {
     // ID="AF" -- Genotype
     assertThat(alleleFrequency.getName()).isEqualTo(alleleFrequencyName);
     assertThat(alleleFrequency.getDescription()).isEqualTo(alleleFrequencyDescription);
-    assertThat(alleleFrequency.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+    assertThat(alleleFrequency.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
     assertThat(alleleFrequency.getType()).isEqualTo(SchemaUtils.BQFieldType.FLOAT);
   }
 

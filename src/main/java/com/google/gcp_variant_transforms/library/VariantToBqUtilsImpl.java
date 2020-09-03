@@ -35,11 +35,10 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
 
   public List<String> getNames(VariantContext variantContext) {
     String names = variantContext.getID();
-    String[] splittedNamesBySemiColon = names.split(";");
     List<String> nameList = new ArrayList<>();
-    for (String name : splittedNamesBySemiColon) {
-      nameList.add(replaceMissingWithNull(name));
-    }
+    if (names.equals(VCFConstants.MISSING_VALUE_v4)) return nameList;
+    String[] splittedNamesBySemiColon = names.split(";");
+    nameList.addAll(Arrays.asList(splittedNamesBySemiColon));
     return nameList;
   }
 
@@ -77,29 +76,32 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     // Iterate all Info field in VCFHeader, if current record does not have the field, skip it.
     for (VCFInfoHeaderLine infoHeaderLine : vcfHeader.getInfoHeaderLines()) {
       String attrName = infoHeaderLine.getID();
-      VCFInfoHeaderLine infoMetadata = vcfHeader.getInfoHeaderLine(attrName);
-      VCFHeaderLineType infoType = infoMetadata.getType();
+      String sanitizedFieldName = SchemaUtils.getSanitizedFieldName(attrName);
+      VCFHeaderLineType infoType = infoHeaderLine.getType();
       if (variantContext.hasAttribute(attrName)) {
         Object value = variantContext.getAttribute(attrName);
-        VCFHeaderLineCount infoCountType = infoMetadata.getCountType();
+        VCFHeaderLineCount infoCountType = infoHeaderLine.getCountType();
         if (infoCountType == VCFHeaderLineCount.A) {
             // Put this info into ALT field.
-            splitAlternateAlleleInfoFields(attrName, value, altMetadata, infoType,
+            splitAlternateAlleleInfoFields(sanitizedFieldName, value, altMetadata, infoType,
                 expectedAltCount);
         } else if (infoCountType == VCFHeaderLineCount.R) {
           // field count should count all alleles, which is expectedAltCount plus reference.
-          row.set(attrName, convertToDefinedType(value, infoType, expectedAltCount + 1));
+          row.set(sanitizedFieldName,
+              convertToDefinedType(value, infoType, expectedAltCount + 1));
         } else if (infoCountType == VCFHeaderLineCount.INTEGER){
-          row.set(attrName, convertToDefinedType(value, infoType, infoMetadata.getCount()));
+          row.set(sanitizedFieldName,
+              convertToDefinedType(value, infoType, infoHeaderLine.getCount()));
         } else {
           // infoCountType is 'G' or '.', which we pass default count and we do not check if the
           // count matches the expected count.
-          row.set(attrName, convertToDefinedType(value, infoType, Constants.DEFAULT_FIELD_COUNT));
+          row.set(sanitizedFieldName,
+              convertToDefinedType(value, infoType, Constants.DEFAULT_FIELD_COUNT));
         }
       } else if (infoType.equals(VCFHeaderLineType.Flag)) {
         // If field is not presented in the VCF record and its field type is `Flag`, we need to
         // set `false` in this field value.
-        row.set(attrName, false);
+        row.set(sanitizedFieldName, false);
       }
     }
   }
@@ -107,11 +109,6 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
   public List<TableRow> getCalls(VariantContext variantContext, VCFHeader vcfHeader) {
     GenotypesContext genotypes = variantContext.getGenotypes();
     List<TableRow> callRows = new ArrayList<>();
-    List<String> headerSampleNames = vcfHeader.getSampleNamesInOrder();
-    if (headerSampleNames.size() != genotypes.size()) {
-      throw new CountNotMatchException("Genotype samples size does not match the sample names " +
-          "defined in VCFHeader");
-    }
     for (Genotype genotype : genotypes) {
       TableRow call = new TableRow();
       call.set(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, genotype.getSampleName());
@@ -145,7 +142,9 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
       }
       List<Object> convertedList = new ArrayList<>();
       for (Object val : valueList) {
-        convertedList.add(convertSingleObjectToDefinedType(val, type));
+        if (!val.equals(VCFConstants.MISSING_VALUE_v4)) {
+          convertedList.add(convertSingleObjectToDefinedType(val, type));
+        }
       }
       return convertedList;
     }
@@ -171,7 +170,7 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     } else if (type == VCFHeaderLineType.Float) {
       return Double.parseDouble(valueStr);
     } else {
-      // type is String
+      // Type is String.
       return valueStr;
     }
   }
@@ -199,28 +198,28 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
         continue; // We will set GT field in a separate "genotype" field in BQ row.
       }
       if (genotype.hasAnyAttribute(attrName)) {
+        String sanitizedFieldName = SchemaUtils.getSanitizedFieldName(attrName);
         Object value = genotype.getAnyAttribute(attrName);
-        VCFFormatHeaderLine formatMetadata = vcfHeader.getFormatHeaderLine(attrName);
-        VCFHeaderLineType formatType = formatMetadata.getType();
+        VCFHeaderLineType formatType = formatHeaderLine.getType();
         if (attrName.equals(VCFConstants.GENOTYPE_ALLELE_DEPTHS) ||
             attrName.equals(VCFConstants.DEPTH_KEY) ||
             attrName.equals(VCFConstants.GENOTYPE_QUALITY_KEY) ||
             attrName.equals(VCFConstants.GENOTYPE_PL_KEY)) {
           // These four field values have been pre-processed in Genotype.
-          row.set(attrName, value);
+          row.set(sanitizedFieldName, value);
         } else if (attrName.equals(VCFConstants.PHASE_SET_KEY)) {
           String phaseSetValue = genotype.getAnyAttribute(VCFConstants.PHASE_SET_KEY).toString();
           phaseSet = replaceMissingWithNull(phaseSetValue);
         } else {
           // The rest of fields need to be converted to the right type as VCFHeader specifies.
-          VCFHeaderLineCount formatCountType = formatMetadata.getCountType();
+          VCFHeaderLineCount formatCountType = formatHeaderLine.getCountType();
           if (formatCountType == VCFHeaderLineCount.INTEGER) {
-            row.set(attrName, convertToDefinedType(genotype.getAnyAttribute(attrName),
-                formatType, formatMetadata.getCount()));
+            row.set(sanitizedFieldName, convertToDefinedType(genotype.getAnyAttribute(attrName),
+                formatType, formatHeaderLine.getCount()));
           } else {
             // If field number in the VCFHeader is ".", should pass a default count and do not
             // check if count is equal to the size of value.
-            row.set(attrName, convertToDefinedType(genotype.getAnyAttribute(attrName),
+            row.set(sanitizedFieldName, convertToDefinedType(genotype.getAnyAttribute(attrName),
                 formatType, Constants.DEFAULT_FIELD_COUNT));
           }
         }

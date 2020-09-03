@@ -168,7 +168,6 @@ public class VariantToBqUtilsTest {
     when(variantContext.getGenotypes()).thenReturn(genotypesContext);
   }
 
-
   @Test
   public void testConvertStringValueToRightValueType_whenComparingElement_thenTrue() {
     // Test list of values.
@@ -243,7 +242,7 @@ public class VariantToBqUtilsTest {
     // Test empty fields.
     when(variantContext.getID()).thenReturn(VCFConstants.MISSING_VALUE_v4);
     assertThat(variantToBqUtils.getNames(variantContext))
-        .isEqualTo(Collections.singletonList(null));
+        .isEqualTo(Collections.emptyList());
   }
 
   @Test
@@ -331,7 +330,7 @@ public class VariantToBqUtilsTest {
    * GT:DP:PS:HQ    1|2:1:0:23,27
    * GT:DP:HQ         .:1:.,.
    * In the second record, genotypes will set [-1,-1] and phase set will set "*",
-   * and HQ will be [null, null]
+   * and HQ will be an empty list for repeated field.
    */
   @Test
   public void testAddCallsWithFieldValue_whenCheckingGenotypeElements_thenTrue() {
@@ -373,6 +372,6 @@ public class VariantToBqUtilsTest {
     assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.CALLS_PHASESET))
         .isEqualTo(Constants.DEFAULT_PHASESET);
     assertThat(rowWithEmptyFields.get(VCFConstants.HAPLOTYPE_QUALITY_KEY))
-        .isEqualTo(Arrays.asList(null,null));
+        .isEqualTo(Collections.emptyList());
   }
 }
