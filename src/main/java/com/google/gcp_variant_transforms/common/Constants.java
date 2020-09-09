@@ -8,7 +8,7 @@ package com.google.gcp_variant_transforms.common;
 public class Constants {
     public static final String DEFAULT_PHASESET = "*";
     public static final int MISSING_GENOTYPE_VALUE = -1;
-    public static final int DEFAULT_FIELD_COUNT = -1;
+    public static final int DEFAULT_REPEATED_FIELD_COUNT = -1;
 
     /**
      * Column filed name constants in the BigQuery schema.

@@ -82,9 +82,9 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
         Object value = variantContext.getAttribute(attrName);
         VCFHeaderLineCount infoCountType = infoHeaderLine.getCountType();
         if (infoCountType == VCFHeaderLineCount.A) {
-            // Put this info into ALT field.
-            splitAlternateAlleleInfoFields(sanitizedFieldName, value, altMetadata, infoType,
-                expectedAltCount);
+          // Put this info into ALT field.
+          splitAlternateAlleleInfoFields(sanitizedFieldName, value, altMetadata, infoType,
+              expectedAltCount);
         } else if (infoCountType == VCFHeaderLineCount.R) {
           // field count should count all alleles, which is expectedAltCount plus reference.
           row.set(sanitizedFieldName,
@@ -94,9 +94,9 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
               convertToDefinedType(value, infoType, infoHeaderLine.getCount()));
         } else {
           // infoCountType is 'G' or '.', which we pass default count and we do not check if the
-          // count matches the expected count.
+          // count matches the expected count. And the field should be repeated (list of values).
           row.set(sanitizedFieldName,
-              convertToDefinedType(value, infoType, Constants.DEFAULT_FIELD_COUNT));
+              convertToDefinedType(value, infoType, Constants.DEFAULT_REPEATED_FIELD_COUNT));
         }
       } else if (infoType.equals(VCFHeaderLineType.Flag)) {
         // If field is not presented in the VCF record and its field type is `Flag`, we need to
@@ -120,14 +120,14 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
   }
 
   public Object convertToDefinedType(Object value, VCFHeaderLineType type, int count) {
-    if (!(value instanceof List)) {
+    if (!(value instanceof List || count == Constants.DEFAULT_REPEATED_FIELD_COUNT)) {
       // Deal with single value.
       if ((value instanceof String) && ((String)value).contains(",")) {
         // Split string value.
         String valueStr = (String)value;
         return convertToDefinedType(Arrays.asList(valueStr.split(",")), type, count);
       } else if (count > 1) {
-        // value is a single value but count > 1, it should raise an exception
+        // Value is a single value but count > 1, it should raise an exception.
         throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
             "defined by VCFHeader");
       } else {
@@ -136,7 +136,7 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     } else {
       // Deal with list of values.
       List<Object> valueList = (List<Object>)value;
-      if (count != Constants.DEFAULT_FIELD_COUNT && count != valueList.size()) {
+      if (count != Constants.DEFAULT_REPEATED_FIELD_COUNT && count != valueList.size()) {
         throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
             "defined by VCFHeader");
       }
@@ -218,9 +218,10 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
                 formatType, formatHeaderLine.getCount()));
           } else {
             // If field number in the VCFHeader is ".", should pass a default count and do not
-            // check if count is equal to the size of value.
+            // check if count is equal to the size of value. And the field should be repeated
+            // (list of values).
             row.set(sanitizedFieldName, convertToDefinedType(genotype.getAnyAttribute(attrName),
-                formatType, Constants.DEFAULT_FIELD_COUNT));
+                formatType, Constants.DEFAULT_REPEATED_FIELD_COUNT));
           }
         }
       }

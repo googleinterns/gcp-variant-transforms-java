@@ -19,7 +19,7 @@ import java.util.Collection;
  * Service to create BigQuery Schema from VCFHeader 
  */
 public class SchemaGeneratorImpl implements SchemaGenerator {
-  
+
   public TableSchema getSchema(VCFHeader vcfHeader) {
     ImmutableList<TableFieldSchema> schemaFields = getFields(vcfHeader);
     return new TableSchema().setFields(schemaFields);
@@ -44,9 +44,9 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
     for (VCFInfoHeaderLine infoHeaderLine : vcfHeader.getInfoHeaderLines()){
       // INFO header lines with Number = 'A' are added under the alternate bases record
       if (infoHeaderLine.getCountType() != VCFHeaderLineCount.A)
-        fields.add(convertCompoundHeaderLineToField(infoHeaderLine));
+        fields.add(convertCompoundHeaderLineToField(infoHeaderLine, true));
     }
-    
+
     return fields.build();
   }
 
@@ -63,11 +63,11 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
         fieldName.equals(Constants.ColumnKeyNames.CALLS)) {
       field = createRecordField(vcfHeader, fieldName);
     } else {
-        field = new TableFieldSchema()
-            .setName(fieldName)
-            .setDescription(SchemaUtils.constantFieldNameToDescriptionMap.get(fieldName))
-            .setMode(SchemaUtils.constantFieldNameToModeMap.get(fieldName))
-            .setType(SchemaUtils.constantFieldNameToTypeMap.get(fieldName));
+      field = new TableFieldSchema()
+          .setName(fieldName)
+          .setDescription(SchemaUtils.constantFieldNameToDescriptionMap.get(fieldName))
+          .setMode(SchemaUtils.constantFieldNameToModeMap.get(fieldName))
+          .setType(SchemaUtils.constantFieldNameToTypeMap.get(fieldName));
     }
     return field;
   }
@@ -99,10 +99,11 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * @return an INFO or FORMAT Field
    */
   @VisibleForTesting
-  protected TableFieldSchema convertCompoundHeaderLineToField(VCFCompoundHeaderLine headerLine) {
+  protected TableFieldSchema convertCompoundHeaderLineToField(VCFCompoundHeaderLine headerLine,
+                                                              boolean isInfo) {
     String bqFieldMode;
-    if ((headerLine.getCountType() == VCFHeaderLineCount.INTEGER &&
-        headerLine.getCount() <= 1) || (headerLine.getCountType() == VCFHeaderLineCount.A)) {
+    if ((headerLine.getCountType() == VCFHeaderLineCount.INTEGER && headerLine.getCount() <= 1) ||
+        ((headerLine.getCountType() == VCFHeaderLineCount.A) && isInfo)) {
       bqFieldMode = SchemaUtils.BQFieldMode.NULLABLE;
     } else { bqFieldMode = SchemaUtils.BQFieldMode.REPEATED; }   // Number = A, R, G, or >1
     return new TableFieldSchema()
@@ -132,13 +133,13 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
     }
     // Adds the FORMAT fields under the Calls record
     for (VCFFormatHeaderLine formatHeaderLine : vcfHeader.getFormatHeaderLines()){
-        // Phaseset and Genotype are already added to callSubFields
-        String callSubFieldName = formatHeaderLine.getID();
-        if (!callSubFieldName.equals(VCFConstants.GENOTYPE_KEY)
-            && !callSubFieldName.equals(VCFConstants.PHASE_SET_KEY)) {
-          callSubFields.add(convertCompoundHeaderLineToField(formatHeaderLine));
-        }
+      // Phaseset and Genotype are already added to callSubFields
+      String callSubFieldName = formatHeaderLine.getID();
+      if (!callSubFieldName.equals(VCFConstants.GENOTYPE_KEY)
+          && !callSubFieldName.equals(VCFConstants.PHASE_SET_KEY)) {
+        callSubFields.add(convertCompoundHeaderLineToField(formatHeaderLine, false));
       }
+    }
     return callSubFields.build();
   }
 
@@ -161,7 +162,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
     // Adds the INFO fields with Number = A (i.e., one value for each alternate) among alternates.
     for (VCFInfoHeaderLine infoHeaderLine : vcfHeader.getInfoHeaderLines()){
       if (infoHeaderLine.getCountType() == VCFHeaderLineCount.A){
-        altSubFields.add(convertCompoundHeaderLineToField(infoHeaderLine));
+        altSubFields.add(convertCompoundHeaderLineToField(infoHeaderLine, true));
       }
     }
     return altSubFields.build();
