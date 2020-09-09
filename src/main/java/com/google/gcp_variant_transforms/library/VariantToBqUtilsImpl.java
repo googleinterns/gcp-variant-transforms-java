@@ -16,11 +16,7 @@ import htsjdk.variant.vcf.VCFHeaderLineCount;
 import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Implementation class for {@link VariantToBqUtils}. It provides functionalities to set default
@@ -121,7 +117,7 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
 
   public Object convertToDefinedType(Object value, VCFHeaderLineType type, int count) {
     if (!(value instanceof List || count == Constants.DEFAULT_REPEATED_FIELD_COUNT)) {
-      // Deal with single value.
+      // Deal with single string value and handle string value with comma.
       if ((value instanceof String) && ((String)value).contains(",")) {
         // Split string value.
         String valueStr = (String)value;
@@ -134,8 +130,10 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
         return convertSingleObjectToDefinedType(value, type);
       }
     } else {
-      // Deal with list of values.
-      List<Object> valueList = (List<Object>)value;
+      // Deal with list of values. If the current value is single value with default repeated
+      // field count, store the value to a list.
+      List<Object> valueList = value instanceof List ?
+          (List<Object>)value : Collections.singletonList(value);
       if (count != Constants.DEFAULT_REPEATED_FIELD_COUNT && count != valueList.size()) {
         throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
             "defined by VCFHeader");
