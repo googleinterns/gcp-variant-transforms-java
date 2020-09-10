@@ -54,7 +54,8 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
         .apply("VariantContextToBQRow",
             ParDo.of(new ConvertVariantToRowFn(bigQueryRowGenerator,
                 context.getVCFHeader(), context.getAllowMalformedRecords(),
-                    VALID_VARIANT_TO_BQ_RECORD_TAG, MALFORMED_RECORD_ERROR_MESSAGE_TAG))
+                    context.getUseOneBasedCoordinate(), VALID_VARIANT_TO_BQ_RECORD_TAG,
+                    MALFORMED_RECORD_ERROR_MESSAGE_TAG))
                 .withOutputTags(VALID_VARIANT_TO_BQ_RECORD_TAG,
                     TupleTagList.of(MALFORMED_RECORD_ERROR_MESSAGE_TAG)));
 

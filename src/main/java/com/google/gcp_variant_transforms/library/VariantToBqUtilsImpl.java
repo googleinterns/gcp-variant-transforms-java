@@ -4,6 +4,7 @@ package com.google.gcp_variant_transforms.library;
 
 import com.google.api.services.bigquery.model.TableRow;
 import com.google.gcp_variant_transforms.common.Constants;
+import com.google.gcp_variant_transforms.entity.Variant;
 import com.google.gcp_variant_transforms.exceptions.CountNotMatchException;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.Genotype;
@@ -41,6 +42,16 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
       nameList.add(replaceMissingWithNull(name));
     }
     return nameList;
+  }
+
+  public int getStart(VariantContext variantContext, boolean useOneBasedCoordinate) {
+    int oneBasedStartPosition = variantContext.getStart();
+    return useOneBasedCoordinate ? oneBasedStartPosition : oneBasedStartPosition - 1;
+  }
+
+  public int getEnd(VariantContext variantContext, boolean useOneBasedCoordinate) {
+    int oneBasedEndPosition = variantContext.getEnd();
+    return useOneBasedCoordinate ? oneBasedEndPosition : oneBasedEndPosition - 1;
   }
 
   public List<TableRow> getAlternateBases(VariantContext variantContext) {

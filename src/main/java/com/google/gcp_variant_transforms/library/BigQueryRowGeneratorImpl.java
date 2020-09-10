@@ -20,13 +20,15 @@ public class BigQueryRowGeneratorImpl implements BigQueryRowGenerator, Serializa
   @Inject
   VariantToBqUtils variantToBqUtils;
 
-  public TableRow convertToBQRow(VariantContext variantContext, VCFHeader vcfHeader) {
+  public TableRow convertToBQRow(VariantContext variantContext, VCFHeader vcfHeader,
+                                 boolean useOneBasedCoordinate) {
     TableRow row = new TableRow();
 
     row.set(Constants.ColumnKeyNames.REFERENCE_NAME, variantContext.getContig());
-    row.set(Constants.ColumnKeyNames.START_POSITION, variantContext.getStart());
-    row.set(Constants.ColumnKeyNames.END_POSITION, variantContext.getEnd());
-
+    row.set(Constants.ColumnKeyNames.START_POSITION, variantToBqUtils.getStart(variantContext,
+        useOneBasedCoordinate));
+    row.set(Constants.ColumnKeyNames.END_POSITION, variantToBqUtils.getEnd(variantContext,
+        useOneBasedCoordinate));
     row.set(Constants.ColumnKeyNames.REFERENCE_BASES,
             variantToBqUtils.getReferenceBases(variantContext));
     row.set(Constants.ColumnKeyNames.NAMES, variantToBqUtils.getNames(variantContext));
