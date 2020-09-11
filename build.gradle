@@ -62,4 +62,5 @@ test {
     events "passed", "skipped", "failed"
     showStandardStreams = true
   }
+  testLogging.showStandardStreams = true
 }

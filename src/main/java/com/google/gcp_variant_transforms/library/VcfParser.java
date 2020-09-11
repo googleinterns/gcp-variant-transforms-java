@@ -4,6 +4,7 @@ package com.google.gcp_variant_transforms.library;
 
 import com.google.common.collect.ImmutableList;
 import htsjdk.variant.vcf.VCFCodec;
+import htsjdk.variant.vcf.VCFHeader;
 import java.io.Serializable;
 
 /**
@@ -19,4 +20,6 @@ public interface VcfParser extends Serializable {
    * @return {@link VCFCodec}, preset with header lines, to parse records one at a time.
    */
   public abstract VCFCodec generateCodecFromHeaderLines(ImmutableList<String> headerLines);
+
+  public abstract VCFHeader generateVCFHeader(ImmutableList<String> headerLines);
 }
