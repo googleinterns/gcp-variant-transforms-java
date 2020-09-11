@@ -12,5 +12,6 @@ public class LibraryTestModule extends AbstractModule {
     bind(VcfParser.class).to(VcfParserImpl.class);
     bind(BigQueryRowGenerator.class).to(BigQueryRowGeneratorImpl.class);
     bind(VariantToBqUtils.class).to(VariantToBqUtilsImpl.class);
+    bind(SchemaGenerator.class).to(SchemaGeneratorImpl.class);
   }
 }
