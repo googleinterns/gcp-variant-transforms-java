@@ -127,7 +127,7 @@ public interface VariantToBqUtils {
    * @param genotype Current genotype sample in the VariantContext
    * @param vcfHeader Define the field type and count format.
    */
-  public void addFormatAndPhaseSet(TableRow row, Genotype genotype, VCFHeader vcfHeader);
+  public void addFormat(TableRow row, Genotype genotype, VCFHeader vcfHeader);
 
   /**
    * <p>

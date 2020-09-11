@@ -100,10 +100,10 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    */
   @VisibleForTesting
   protected TableFieldSchema convertCompoundHeaderLineToField(VCFCompoundHeaderLine headerLine,
-                                                              boolean isInfo) {
+                                                              boolean isMovedToAlt) {
     String bqFieldMode;
     if ((headerLine.getCountType() == VCFHeaderLineCount.INTEGER && headerLine.getCount() <= 1) ||
-        ((headerLine.getCountType() == VCFHeaderLineCount.A) && isInfo)) {
+        ((headerLine.getCountType() == VCFHeaderLineCount.A) && isMovedToAlt)) {
       bqFieldMode = SchemaUtils.BQFieldMode.NULLABLE;
     } else { bqFieldMode = SchemaUtils.BQFieldMode.REPEATED; }   // Number = A, R, G, or >1
     return new TableFieldSchema()

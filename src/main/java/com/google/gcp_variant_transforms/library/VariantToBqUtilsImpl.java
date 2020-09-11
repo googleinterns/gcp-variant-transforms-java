@@ -16,7 +16,12 @@ import htsjdk.variant.vcf.VCFHeaderLineCount;
 import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Implementation class for {@link VariantToBqUtils}. It provides functionalities to set default
@@ -105,10 +110,15 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
   public List<TableRow> getCalls(VariantContext variantContext, VCFHeader vcfHeader) {
     GenotypesContext genotypes = variantContext.getGenotypes();
     List<TableRow> callRows = new ArrayList<>();
+    List<String> headerSampleNames = vcfHeader.getSampleNamesInOrder();
+    if (headerSampleNames.size() != genotypes.size()) {
+      throw new CountNotMatchException("Genotype samples size does not match the sample names " +
+          "defined in VCFHeader");
+    }
     for (Genotype genotype : genotypes) {
       TableRow call = new TableRow();
       call.set(Constants.ColumnKeyNames.CALLS_SAMPLE_NAME, genotype.getSampleName());
-      addFormatAndPhaseSet(call, genotype, vcfHeader);
+      addFormat(call, genotype, vcfHeader);
       addGenotypes(call, genotype.getAlleles(), variantContext);
       callRows.add(call);
     }
@@ -116,7 +126,7 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
   }
 
   public Object convertToDefinedType(Object value, VCFHeaderLineType type, int count) {
-    if (!(value instanceof List || count == Constants.DEFAULT_REPEATED_FIELD_COUNT)) {
+    if (!(value instanceof List) && count != Constants.DEFAULT_REPEATED_FIELD_COUNT) {
       // Deal with single string value and handle string value with comma.
       if ((value instanceof String) && ((String)value).contains(",")) {
         // Split string value.
@@ -187,8 +197,8 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     row.set(Constants.ColumnKeyNames.CALLS_GENOTYPE, genotypes);
   }
 
-  public void addFormatAndPhaseSet(TableRow row, Genotype genotype, VCFHeader vcfHeader) {
-    String phaseSet = "";
+  public void addFormat(TableRow row, Genotype genotype, VCFHeader vcfHeader) {
+    String phaseSet = Constants.DEFAULT_PHASESET;
     // Iterate all format fields in VCFHeader.
     for (VCFFormatHeaderLine formatHeaderLine : vcfHeader.getFormatHeaderLines()) {
       String attrName = formatHeaderLine.getID();
@@ -215,21 +225,16 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
             row.set(sanitizedFieldName, convertToDefinedType(genotype.getAnyAttribute(attrName),
                 formatType, formatHeaderLine.getCount()));
           } else {
-            // If field number in the VCFHeader is ".", should pass a default count and do not
-            // check if count is equal to the size of value. And the field should be repeated
-            // (list of values).
+            // If field number in the VCFHeader is "A", "R", "G" or ".", should pass a default
+            // count and do not check if count is equal to the size of value. And the field
+            // should be repeated (list of values).
             row.set(sanitizedFieldName, convertToDefinedType(genotype.getAnyAttribute(attrName),
                 formatType, Constants.DEFAULT_REPEATED_FIELD_COUNT));
           }
         }
       }
     }
-    if (phaseSet == null || !phaseSet.isEmpty()) {
-      // PhaseSet is presented(MISSING_FIELD_VALUE('.') or a specific value).
       row.set(Constants.ColumnKeyNames.CALLS_PHASESET, phaseSet);
-    } else {
-      row.set(Constants.ColumnKeyNames.CALLS_PHASESET, Constants.DEFAULT_PHASESET);
-    }
   }
 
   public void splitAlternateAlleleInfoFields(String attrName, Object value,

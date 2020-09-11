@@ -58,14 +58,15 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
                     TupleTagList.of(MALFORMED_RECORD_ERROR_MESSAGE_TAG)));
 
     PCollection<TableRow> validRowCollection = tableRowTuple.get(VALID_VARIANT_TO_BQ_RECORD_TAG);
-    PCollection<String> errorMessageCollection =
-        tableRowTuple.get(MALFORMED_RECORD_ERROR_MESSAGE_TAG);
 
     validRowCollection.apply("WriteTableRowToBigQuery",
         BigQueryIO.writeTableRows().to(context.getOutput())
             .withSchema(context.getBqSchema())
             .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
             .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
+
+    PCollection<String> errorMessageCollection =
+        tableRowTuple.get(MALFORMED_RECORD_ERROR_MESSAGE_TAG);
 
     errorMessageCollection
         .apply(TextIO.write().to(context.getMalformedRecordsMessagePath()).withNoSpilling());
