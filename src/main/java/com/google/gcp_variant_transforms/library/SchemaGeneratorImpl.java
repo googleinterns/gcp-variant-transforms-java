@@ -20,8 +20,8 @@ import java.util.Collection;
  */
 public class SchemaGeneratorImpl implements SchemaGenerator {
   
-  public TableSchema getSchema(VCFHeader vcfHeader) {
-    ImmutableList<TableFieldSchema> schemaFields = getFields(vcfHeader);
+  public TableSchema getSchema(VCFHeader vcfHeader, boolean useOneBasedCoordinate) {
+    ImmutableList<TableFieldSchema> schemaFields = getFields(vcfHeader, useOneBasedCoordinate);
     return new TableSchema().setFields(schemaFields);
   }
 
@@ -31,13 +31,14 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * @return list of Field objects
    */
   @VisibleForTesting
-  protected ImmutableList<TableFieldSchema> getFields(VCFHeader vcfHeader) {
+  protected ImmutableList<TableFieldSchema> getFields(VCFHeader vcfHeader,
+                                                      boolean useOneBasedCoordinate) {
     ImmutableList.Builder<TableFieldSchema> fields = new ImmutableList.Builder<>();
     Collection<String> constantFieldNames = SchemaUtils.constantFieldIndexToNameMap.values();
 
     // Adds constant fields and records.
     for (String constantFieldName : constantFieldNames) {
-      TableFieldSchema field = createField(vcfHeader, constantFieldName);
+      TableFieldSchema field = createField(vcfHeader, constantFieldName, useOneBasedCoordinate);
       fields.add(field);
     }
     // Adds remaining INFO fields.
@@ -57,15 +58,16 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * @return field
    */
   @VisibleForTesting
-  protected TableFieldSchema createField(VCFHeader vcfHeader, String fieldName){
+  protected TableFieldSchema createField(VCFHeader vcfHeader, String fieldName,
+                                         boolean useOneBasedCoordinate) {
     TableFieldSchema field;
     if (fieldName.equals(Constants.ColumnKeyNames.ALTERNATE_BASES) ||
         fieldName.equals(Constants.ColumnKeyNames.CALLS)) {
-      field = createRecordField(vcfHeader, fieldName);
+      field = createRecordField(vcfHeader, fieldName, useOneBasedCoordinate);
     } else {
         field = new TableFieldSchema()
             .setName(fieldName)
-            .setDescription(SchemaUtils.constantFieldNameToDescriptionMap.get(fieldName))
+            .setDescription(SchemaUtils.getDescription(fieldName, useOneBasedCoordinate))
             .setMode(SchemaUtils.constantFieldNameToModeMap.get(fieldName))
             .setType(SchemaUtils.constantFieldNameToTypeMap.get(fieldName));
     }
@@ -79,7 +81,8 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
    * @return a record field
    */
   @VisibleForTesting
-  protected TableFieldSchema createRecordField(VCFHeader vcfHeader, String fieldName) {
+  protected TableFieldSchema createRecordField(VCFHeader vcfHeader, String fieldName,
+                                               boolean useOneBasedCoordinate) {
     ImmutableList<TableFieldSchema> subFields;
     if (fieldName.equals(Constants.ColumnKeyNames.ALTERNATE_BASES)) {
       subFields = getAltSubFields(vcfHeader);
@@ -87,7 +90,7 @@ public class SchemaGeneratorImpl implements SchemaGenerator {
 
     return new TableFieldSchema()
         .setName(fieldName)
-        .setDescription(SchemaUtils.constantFieldNameToDescriptionMap.get(fieldName))
+        .setDescription(SchemaUtils.getDescription(fieldName, useOneBasedCoordinate))
         .setMode(SchemaUtils.constantFieldNameToModeMap.get(fieldName))
         .setType(SchemaUtils.constantFieldNameToTypeMap.get(fieldName))
         .setFields(subFields);

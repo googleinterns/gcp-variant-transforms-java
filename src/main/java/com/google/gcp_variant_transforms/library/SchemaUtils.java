@@ -39,8 +39,10 @@ public class SchemaUtils {
 
   public static class FieldDescription {
     public static final String REFERENCE_NAME = "Reference name.";
-    public static final String START_POSITION = "Start position (0-based). Corresponds to the " +
-        "first base of the string of reference bases.";
+    public static final String START_POSITION_ZERO_BASED = "Start position (0-based). Corresponds" +
+        " to the first base of the string of reference bases.";
+    public static final String START_POSITION_ONE_BASED = "Start position (1-based). Corresponds" +
+        " to the first base of the string of reference bases.";
     public static final String END_POSITION = "End position. Corresponds to the first base " +
         "after the last base in the reference allele.";
     public static final String REFERENCE_BASES = "Reference bases.";
@@ -95,10 +97,10 @@ public class SchemaUtils {
     put(FieldIndex.CALLS_PHASESET, Constants.ColumnKeyNames.CALLS_PHASESET);
   }};
 
-  // Maps a constant Field name to its description.
+  // Maps a constant Field name to its description, start position excluded. Start position
+  // depends on the input useOneBasedCoordinate flag.
   public static Map<String, String> constantFieldNameToDescriptionMap = Stream.of(new String[][] {
       {Constants.ColumnKeyNames.REFERENCE_NAME, FieldDescription.REFERENCE_NAME},
-      {Constants.ColumnKeyNames.START_POSITION, FieldDescription.START_POSITION},
       {Constants.ColumnKeyNames.END_POSITION, FieldDescription.END_POSITION},
       {Constants.ColumnKeyNames.REFERENCE_BASES, FieldDescription.REFERENCE_BASES},
       {Constants.ColumnKeyNames.ALTERNATE_BASES, FieldDescription.ALTERNATE_BASES},
@@ -170,6 +172,34 @@ public class SchemaUtils {
         put(VCFConstants.GENOTYPE_KEY, Constants.ColumnKeyNames.CALLS_GENOTYPE);
         put(VCFConstants.PHASE_SET_KEY, Constants.ColumnKeyNames.CALLS_PHASESET);
   }};
+
+  /**
+   * Get start position field description. It should specify the coordinate is 1-based or 0-based.
+   * @param useOneBasedCoordinate Flag of using 1-based coordinate or not.
+   * @return Description of start position field.
+   */
+  public static String getStartPositionDescription(boolean useOneBasedCoordinate) {
+    return useOneBasedCoordinate ? FieldDescription.START_POSITION_ONE_BASED :
+        FieldDescription.START_POSITION_ZERO_BASED;
+  }
+
+  /**
+   * Get the description of fields. For start position, it depends on the flag of
+   * useOneBasedCoordinate and the description should mention the coordinate is 1-based or 0-based.
+   * @param fieldName Flag of using 1-based coordinate or not.
+   * @param useOneBasedCoordinate
+   * @return Description of the field.
+   */
+  public static String getDescription(String fieldName, boolean useOneBasedCoordinate) {
+    if (constantFieldNameToDescriptionMap.containsKey(fieldName)) {
+      return constantFieldNameToDescriptionMap.get(fieldName);
+    } else if (fieldName.equals(Constants.ColumnKeyNames.START_POSITION)){
+      return getStartPositionDescription(useOneBasedCoordinate);
+    } else {
+      throw new RuntimeException("There is no such a field name \"" + fieldName + "\" in the " +
+          "columns.");
+    }
+  }
 
   /**
    * Returns the sanitized field name according to BigQuery restrictions.

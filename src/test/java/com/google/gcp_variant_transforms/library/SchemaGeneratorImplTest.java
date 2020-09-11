@@ -66,7 +66,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetFields_whenGetReferenceField_thenIsEqualTo() {
     // Column: reference field
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.REFERENCE_NAME);
     TableFieldSchema referenceField = fieldIterator.next();
@@ -82,7 +82,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetFields_whenGetStartPosField_thenIsEqualTo() {
     // Column: start position
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.START_POSITION);
     TableFieldSchema startPosField = fieldIterator.next();
@@ -90,7 +90,7 @@ public class SchemaGeneratorImplTest {
     assertThat(startPosField.getName())
         .isEqualTo(Constants.ColumnKeyNames.START_POSITION);
     assertThat(startPosField.getDescription())
-        .isEqualTo(SchemaUtils.FieldDescription.START_POSITION);
+        .isEqualTo(SchemaUtils.getDescription(Constants.ColumnKeyNames.START_POSITION, true));
     assertThat(startPosField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
     assertThat(startPosField.getType()).isEqualTo(SchemaUtils.BQFieldType.INTEGER);
   }
@@ -98,7 +98,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetFields_whenGetEndPosField_thenIsEqualTo() {
     // Column: end position
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.END_POSITION);
     TableFieldSchema endPosField = fieldIterator.next();
@@ -114,7 +114,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetFields_whenGetReferenceBasesField_thenIsEqualTo() {
     // Column: reference bases
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.REFERENCE_BASES);
     TableFieldSchema referenceBasesField = fieldIterator.next();
@@ -130,7 +130,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetFields_whenGetAlternateBasesField_thenIsEqualTo() {
     // Column: reference bases
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.ALTERNATE_BASES);
     TableFieldSchema alternateBasesField = fieldIterator.next();
@@ -146,7 +146,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetFields_whenGetNamesField_thenIsEqualTo() {
     // Column: names
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.NAMES);
     TableFieldSchema namesField = fieldIterator.next();
@@ -162,7 +162,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetFields_whenGetQualityField_thenIsEqualTo() {
     // Column: quality
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.QUALITY);
     TableFieldSchema qualityField = fieldIterator.next();
@@ -178,7 +178,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetFields_whenGetFilterField_thenIsEqualTo() {
     // Column: filter
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.FILTER);
     TableFieldSchema filterField = fieldIterator.next();
@@ -194,7 +194,7 @@ public class SchemaGeneratorImplTest {
   @Test
   public void testGetFields_whenGetCallsField_thenIsEqualTo() {
     // Column: calls record
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.CALLS);
     TableFieldSchema callsField = fieldIterator.next();
@@ -212,7 +212,7 @@ public class SchemaGeneratorImplTest {
     // Columns: calls record's constant subfields
     // Verifies that the call record's sub-Fields maintain data integrity
     // after they are added to the call record in a FieldList.
-    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader);
+    ImmutableList<TableFieldSchema> fields = schemaGen.getFields(mockedVcfHeader, true);
     UnmodifiableListIterator<TableFieldSchema> fieldIterator =
         fields.listIterator(SchemaUtils.FieldIndex.CALLS);
     TableFieldSchema callsField = fieldIterator.next();
@@ -331,7 +331,7 @@ public class SchemaGeneratorImplTest {
     String readDepthDescription = "Read Depth";
     String haplotypeQualityDescription = "Haplotype Quality";
 
-    TableFieldSchema callsField = schemaGen.createRecordField(sampleVcfHeader, fieldName);
+    TableFieldSchema callsField = schemaGen.createRecordField(sampleVcfHeader, fieldName, true);
     List<TableFieldSchema> callsSubFields = callsField.getFields();
 
     TableFieldSchema genotypeQuality = callsSubFields.get(genotypeQualityIndex);
@@ -363,7 +363,7 @@ public class SchemaGeneratorImplTest {
     String fieldName = Constants.ColumnKeyNames.CALLS;
     sampleVcfHeader.addMetaDataLine(new VCFFormatHeaderLine(
         "PS", 1, VCFHeaderLineType.String, "description"));
-    TableFieldSchema callsField = schemaGen.createRecordField(sampleVcfHeader, fieldName);
+    TableFieldSchema callsField = schemaGen.createRecordField(sampleVcfHeader, fieldName, true);
     List<TableFieldSchema> callsSubFields = callsField.getFields();
     // 3 constants fields and 5 added from sample v4.2 header:
     // 'GQ', 'DP', 'HP', 'GL'
@@ -396,7 +396,7 @@ public class SchemaGeneratorImplTest {
     String alleleFrequencyName = "AF";
     String alleleFrequencyDescription = "Allele Frequency";
 
-    TableFieldSchema altField = schemaGen.createRecordField(sampleVcfHeader, fieldName);
+    TableFieldSchema altField = schemaGen.createRecordField(sampleVcfHeader, fieldName, true);
     List<TableFieldSchema> altSubFields = altField.getFields();
     TableFieldSchema alleleFrequency = altSubFields.get(alleleFrequencyIndex);
     TableFieldSchema altBaseField = altSubFields.get(altBaseIndex);
@@ -481,5 +481,13 @@ public class SchemaGeneratorImplTest {
     String actualFieldName = SchemaUtils.getSanitizedFieldName(fieldName);
 
     assertThat(actualFieldName).isEqualTo(fieldName); // Should be unchanged.
+  }
+
+  @Test
+  public void testGetStartPositionDescription_whenCheckingFlagElement_thenTrue() {
+    assertThat(SchemaUtils.getStartPositionDescription(true))
+        .isEqualTo(SchemaUtils.FieldDescription.START_POSITION_ONE_BASED);
+    assertThat(SchemaUtils.getStartPositionDescription(false))
+        .isEqualTo(SchemaUtils.FieldDescription.START_POSITION_ZERO_BASED);
   }
 }

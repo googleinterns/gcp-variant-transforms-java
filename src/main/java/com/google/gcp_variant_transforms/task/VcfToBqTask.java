@@ -49,7 +49,8 @@ public class VcfToBqTask implements Task {
     setPipelineOptions(this.options);
     context.setHeaderLines(headerReader.getHeaderLines());
     context.setVCFHeader(parser.generateVCFHeader(context.getHeaderLines()));
-    context.setBqSchema(schemaGenerator.getSchema(context.getVCFHeader()));
+    context.setBqSchema(schemaGenerator.getSchema(context.getVCFHeader(),
+        context.getUseOneBasedCoordinate()));
     pipelineRunner.runPipeline();
   }
 
