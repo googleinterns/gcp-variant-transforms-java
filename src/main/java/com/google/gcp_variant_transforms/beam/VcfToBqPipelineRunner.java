@@ -67,11 +67,11 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
 
     PCollection<TableRow> validRowCollection = tableRowTuple.get(VALID_VARIANT_TO_BQ_RECORD_TAG);
 
-//    validRowCollection.apply("WriteTableRowToBigQuery",
-//        BigQueryIO.writeTableRows().to(context.getOutput())
-//            .withSchema(context.getBqSchema())
-//            .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
-//            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
+    validRowCollection.apply("WriteTableRowToBigQuery",
+        BigQueryIO.writeTableRows().to(context.getOutput())
+            .withSchema(context.getBqSchema())
+            .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
+            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
 
     PCollection<MalformedRecord> errorMessageCollection =
         tableRowTuple.get(MALFORMED_RECORD_ERROR_MESSAGE_TAG);
