@@ -4,6 +4,7 @@ package com.google.gcp_variant_transforms.library;
 
 import com.google.api.services.bigquery.model.TableRow;
 import com.google.gcp_variant_transforms.common.Constants;
+import com.google.gcp_variant_transforms.exceptions.MalformedRecordException;
 import com.google.inject.Inject;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFHeader;
@@ -46,10 +47,9 @@ public class BigQueryRowGeneratorImpl implements BigQueryRowGenerator, Serializa
       List<TableRow> callRows = variantToBqUtils.getCalls(variantContext, vcfHeader);
       row.set(Constants.ColumnKeyNames.CALLS, callRows);
     } catch (Exception e) {
-      String malformedRecordInfoPrefix = "Record with contig: " + variantContext.getContig() + "," +
-          " start position: " + variantContext.getStart() + ", reference bases: " +
-          variantToBqUtils.getReferenceBases(variantContext) + ", error: ";
-      throw new RuntimeException(malformedRecordInfoPrefix + e.getMessage());
+      throw new MalformedRecordException(e.getMessage(), variantContext.getContig(),
+          String.valueOf(variantContext.getStart()),
+          variantToBqUtils.getReferenceBases(variantContext));
     }
     return row;
   }

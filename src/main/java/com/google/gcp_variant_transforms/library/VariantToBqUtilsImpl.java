@@ -140,10 +140,11 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
         return convertSingleObjectToDefinedType(value, type);
       }
     } else {
-      // Deal with list of values. If the current value is single value with default repeated
-      // field count, store the value to a list.
+      // Deal with repeated values. If the current value is single value with default repeated
+      // field count, check if the string value need to split with comma, and store the value to a
+      // list.
       List<Object> valueList = value instanceof List ?
-          (List<Object>)value : Collections.singletonList(value);
+          (List<Object>)value : Arrays.asList(((String)value).split(","));
       if (count != Constants.DEFAULT_REPEATED_FIELD_COUNT && count != valueList.size()) {
         throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
             "defined by VCFHeader");
