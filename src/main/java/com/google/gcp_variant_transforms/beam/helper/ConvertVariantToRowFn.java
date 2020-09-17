@@ -38,11 +38,12 @@ public class ConvertVariantToRowFn extends DoFn<VariantContext, TableRow> {
           .output(bigQueryRowGenerator.convertToBQRow(variantContext, vcfHeader));
     } catch (Exception e) {
       if (allowMalformedRecords && e instanceof MalformedRecordException) {
-        MalformedRecordException malformedRecordException = (MalformedRecordException) e;
+        MalformedRecordException malformedRecordException = (MalformedRecordException)e;
         receiver.get(errorMessages).output(
             new MalformedRecord(malformedRecordException.getReferenceName(),
-                malformedRecordException.getStart(), malformedRecordException.getReferenceBases()
-                , malformedRecordException.getMessage()));
+                    malformedRecordException.getStart(),
+                    malformedRecordException.getReferenceBases(),
+                    malformedRecordException.getMessage()));
       } else {
         throw new RuntimeException(e.getMessage());
       }

@@ -34,7 +34,7 @@ import org.junit.Test;
  * 'getRows' method in ConvertVariantRowFn.java and BigQueryRowGeneratorImpl.java
  */
 public class BigQueryRowGeneratorTest {
-  private static final String TEST_FILE = "/usr/local/google/home/zqsun/project/test_platinum.vcf";
+  private static final String TEST_FILE = "src/test/resources/vcf_files_small_valid-4.0.vcf";
   private static final String TEST_REFERENCE_NAME = "20";
   private static final String TEST_ID= "rs6054257";
   private static final String TEST_REFERENCE_BASES = "G";

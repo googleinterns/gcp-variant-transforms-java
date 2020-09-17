@@ -25,7 +25,7 @@ public class BigQueryRowGeneratorImpl implements BigQueryRowGenerator, Serializa
     TableRow row = new TableRow();
 
     row.set(Constants.ColumnKeyNames.REFERENCE_NAME, variantContext.getContig());
-    row.set(Constants.ColumnKeyNames.START_POSITION, variantContext.getStart() - 1);
+    row.set(Constants.ColumnKeyNames.START_POSITION, variantContext.getStart());
     row.set(Constants.ColumnKeyNames.END_POSITION, variantContext.getEnd());
 
     row.set(Constants.ColumnKeyNames.REFERENCE_BASES,

@@ -82,8 +82,8 @@ public final class VcfToBqPipelineRunner implements PipelineRunner {
             record.getReferenceBases(), record.getErrorMessage())))
         .apply(FileIO.<List<String>>write()
             .via(new MalformedRecordCSVSink(Arrays.asList(Constants.ColumnKeyNames.REFERENCE_NAME,
-                Constants.ColumnKeyNames.START_POSITION, Constants.ColumnKeyNames.REFERENCE_BASES
-                , "error_message")))
+                Constants.ColumnKeyNames.START_POSITION, Constants.ColumnKeyNames.REFERENCE_BASES,
+                "error_message")))
             .to(context.getMalformedRecordsMessagePath())
             .withPrefix("malformed_record")
             .withSuffix(".csv"));

@@ -126,25 +126,14 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
   }
 
   public Object convertToDefinedType(Object value, VCFHeaderLineType type, int count) {
-    if (!(value instanceof List) && count != Constants.DEFAULT_REPEATED_FIELD_COUNT) {
-      // Deal with single string value and handle string value with comma.
-      if ((value instanceof String) && ((String)value).contains(",")) {
-        // Split string value.
-        String valueStr = (String)value;
-        return convertToDefinedType(Arrays.asList(valueStr.split(",")), type, count);
-      } else if (count > 1) {
-        // Value is a single value but count > 1, it should raise an exception.
-        throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
-            "defined by VCFHeader");
-      } else {
-        return convertSingleObjectToDefinedType(value, type);
-      }
-    } else {
-      // Deal with repeated values. If the current value is single value with default repeated
-      // field count, check if the string value need to split with comma, and store the value to a
-      // list.
-      List<Object> valueList = value instanceof List ?
-          (List<Object>)value : Arrays.asList(((String)value).split(","));
+    // if the value is string value with comma, parse to list of values.
+    if ((value instanceof String) && ((String)value).contains(",")) {
+      return convertToDefinedType(Arrays.asList(((String)value).split(",")), type, count);
+    }
+
+    if (value instanceof List) {
+      // Deal with list of values. Check if the size of the value list matches the count defined
+      List<Object> valueList = (List<Object>)value;
       if (count != Constants.DEFAULT_REPEATED_FIELD_COUNT && count != valueList.size()) {
         throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
             "defined by VCFHeader");
@@ -156,6 +145,19 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
         }
       }
       return convertedList;
+    } else {
+      if (count > 1) {
+        // Value is a single value but count > 1, it should raise an exception.
+        throw new CountNotMatchException("Value \"" + value + "\" size does not match the count " +
+            "defined by VCFHeader");
+      } else if (count == Constants.DEFAULT_REPEATED_FIELD_COUNT) {
+        // If count is DEFAULT_REPEATED_COUNT, put the single value into a list.
+        Object convertedValue = convertSingleObjectToDefinedType(value, type);
+        return convertedValue == null ? Collections.emptyList() :
+            Collections.singletonList(convertedValue);
+      } else {
+        return convertSingleObjectToDefinedType(value, type);
+      }
     }
   }
 
