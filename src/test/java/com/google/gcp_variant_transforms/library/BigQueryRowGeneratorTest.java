@@ -83,7 +83,8 @@ public class BigQueryRowGeneratorTest {
     // Build BQ rows.
     rows = new ArrayList<>();
     for (int i = 0; i < vcfRecords.size(); ++i) {
-      rows.add(bigQueryRowGenerator.convertToBQRow(vcfCodec.decode(vcfRecords.get(i)), vcfHeader));
+      rows.add(bigQueryRowGenerator.convertToBQRow(vcfCodec.decode(vcfRecords.get(i)), vcfHeader,
+          true));
     }
 
     // The first row covers all base fields without missing field value(".").

@@ -19,6 +19,7 @@ public class VcfToBqContext extends AbstractContext {
   private final String output;
   private final String malformedRecordsMessage;
   private final Boolean allowMalformedRecords;
+  private final Boolean useOneBasedCoordinate;
   private ImmutableList<String> headerLines = null;
   private VCFHeader vcfHeader = null;
   private TableSchema bqSchema = null;
@@ -29,6 +30,7 @@ public class VcfToBqContext extends AbstractContext {
     this.inputFile = options.getInputFile();
     this.output = options.getOutput();
     this.allowMalformedRecords = options.getAllowMalformedRecords();
+    this.useOneBasedCoordinate = options.getUseOneBasedCoordinate();
     this.malformedRecordsMessage = options.getMalformedRecordsReportPath();
     validateFlags();
   }
@@ -72,6 +74,8 @@ public class VcfToBqContext extends AbstractContext {
   public boolean getAllowMalformedRecords() {
     return this.allowMalformedRecords;
   }
+
+  public boolean getUseOneBasedCoordinate() { return this.useOneBasedCoordinate; }
 
   public void setVCFHeader(VCFHeader vcfHeader){
     this.vcfHeader = vcfHeader;

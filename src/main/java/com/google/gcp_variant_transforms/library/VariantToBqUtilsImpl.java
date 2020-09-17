@@ -43,6 +43,11 @@ public class VariantToBqUtilsImpl implements VariantToBqUtils, Serializable {
     return nameList;
   }
 
+  public int getStart(VariantContext variantContext, boolean useOneBasedCoordinate) {
+    int oneBasedStartPosition = variantContext.getStart();
+    return useOneBasedCoordinate ? oneBasedStartPosition : oneBasedStartPosition - 1;
+  }
+
   public List<TableRow> getAlternateBases(VariantContext variantContext) {
     List<TableRow> altMetadata = new ArrayList<>();
     List<Allele> altAlleles = variantContext.getAlternateAlleles();

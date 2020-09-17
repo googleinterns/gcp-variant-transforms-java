@@ -15,17 +15,20 @@ import org.apache.beam.sdk.values.TupleTag;
 public class ConvertVariantToRowFn extends DoFn<VariantContext, TableRow> {
 
   private final boolean allowMalformedRecords;
+  private final boolean useOneBasedCoordinate;
   private final BigQueryRowGenerator bigQueryRowGenerator;
   private final VCFHeader vcfHeader;
   private final TupleTag<TableRow> validRecords;
   private final TupleTag<MalformedRecord> errorMessages;
 
   public ConvertVariantToRowFn(BigQueryRowGenerator bigQueryRowGenerator, VCFHeader vcfHeader,
-                               boolean allowMalformedRecords, TupleTag<TableRow> validRecords,
+                               boolean allowMalformedRecords, boolean useOneBasedCoordinate,
+                               TupleTag<TableRow> validRecords,
                                TupleTag<MalformedRecord> errorMessages) {
     this.bigQueryRowGenerator = bigQueryRowGenerator;
     this.vcfHeader = vcfHeader;
     this.allowMalformedRecords = allowMalformedRecords;
+    this.useOneBasedCoordinate = useOneBasedCoordinate;
     this.validRecords = validRecords;
     this.errorMessages = errorMessages;
   }
@@ -35,7 +38,8 @@ public class ConvertVariantToRowFn extends DoFn<VariantContext, TableRow> {
                              MultiOutputReceiver receiver) {
     try {
       receiver.get(validRecords)
-          .output(bigQueryRowGenerator.convertToBQRow(variantContext, vcfHeader));
+          .output(bigQueryRowGenerator.convertToBQRow(variantContext, vcfHeader,
+              useOneBasedCoordinate));
     } catch (Exception e) {
       if (allowMalformedRecords && e instanceof MalformedRecordException) {
         MalformedRecordException malformedRecordException = (MalformedRecordException)e;

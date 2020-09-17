@@ -15,5 +15,5 @@ public interface SchemaGenerator {
    * @param vcfHeader
    * @return TableSchema
    */
-  TableSchema getSchema(VCFHeader vcfHeader);
+  TableSchema getSchema(VCFHeader vcfHeader, boolean useOneBasedCoordinate);
 }

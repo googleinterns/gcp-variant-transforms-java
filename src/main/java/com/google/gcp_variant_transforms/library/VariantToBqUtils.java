@@ -23,6 +23,15 @@ public interface VariantToBqUtils {
   public String getReferenceBases(VariantContext variantContext);
 
   /**
+   * Get start position. Default coordinate in {@link VariantContext} is 1-based. If
+   * useOneBasedCoordinate is false, we will use 0-based coordinate.
+   * @param variantContext
+   * @param useOneBasedCoordinate Flag for using 1-based coordinates or not.
+   * @return Start position for specific 1-based or 0-based coordinate.
+   */
+  public int getStart(VariantContext variantContext, boolean useOneBasedCoordinate);
+
+  /**
    * Get names from VariantContext's ID field. It should be a semi-colon separated list of
    * unique identifiers where available.
    * As names field is repeated, if the value is a missing value("."), return an empty list.

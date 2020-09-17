@@ -44,6 +44,7 @@ public class VariantToBqUtilsTest {
   private static final boolean TEST_DB_PRESENT = true;
   private static final boolean TEST_DB_NOT_PRESENT = false;
   private static final double TEST_AF = 0.333;
+  private static final int TEST_START_POSITION = 10000;
   private static final int TEST_NS = 2;
   private static final int DEFAULT_GENOTYPE = -1;
 
@@ -226,6 +227,15 @@ public class VariantToBqUtilsTest {
     when(variantContext.getReference()).thenReturn(refAllele);
 
     assertThat(variantToBqUtils.getReferenceBases(variantContext)).isEqualTo(TEST_REFERENCE_BASES);
+  }
+
+  @Test
+  public void testGetStartPosition_whenCheckingFlagInput_thenTrue() {
+    when(variantContext.getStart()).thenReturn(TEST_START_POSITION);
+    assertThat(variantToBqUtils.getStart(variantContext, true))
+        .isEqualTo(TEST_START_POSITION);
+    assertThat(variantToBqUtils.getStart(variantContext, false))
+        .isEqualTo(TEST_START_POSITION - 1);
   }
 
   @Test

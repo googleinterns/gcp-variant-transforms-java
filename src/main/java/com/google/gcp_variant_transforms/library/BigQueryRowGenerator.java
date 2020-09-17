@@ -19,5 +19,6 @@ public interface BigQueryRowGenerator {
    * @param vcfHeader
    * @return TableRow with all field values of one VCF record.
    */
-  public TableRow convertToBQRow(VariantContext variantContext, VCFHeader vcfHeader);
+  public TableRow convertToBQRow(VariantContext variantContext, VCFHeader vcfHeader,
+                                 boolean useOneBasedCoordinate);
 }

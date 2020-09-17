@@ -22,8 +22,13 @@ public interface VcfToBqOptions extends PipelineOptions {
   String getInputFile();
   void setInputFile(String value);
 
+  @Description("Flag for using 1-based coordinate")
+  @Default.Boolean(false)
+  public Boolean getUseOneBasedCoordinate();
+  void setUseOneBasedCoordinate(Boolean value);
+
   @Description("Flag for allowing malformed records")
-  @Default.Boolean(true)
+  @Default.Boolean(false)
   public Boolean getAllowMalformedRecords();
   void setAllowMalformedRecords(Boolean value);
 
