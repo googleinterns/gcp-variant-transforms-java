@@ -33,8 +33,8 @@ public interface VariantToBqUtils {
 
   /**
    * Get names from VariantContext's ID field. It should be a semi-colon separated list of
-   * unique identifiers where available. In each separated ID, set null in this field if there is
-   * a missing value.
+   * unique identifiers where available.
+   * As names field is repeated, if the value is a missing value("."), return an empty list.
    * @param variantContext
    * @return List of names after handling missing value.
    */
@@ -48,7 +48,9 @@ public interface VariantToBqUtils {
   public List<TableRow> getAlternateBases(VariantContext variantContext);
 
   /**
-   * Get filter set. If it is an empty set, it is required to add "PASS" in the filter.
+   * Get filter set. If it is an empty set in {@link VariantContext}, it means the current filter
+   * status is "PASS", and we need to add "PASS" in the filter row field.
+   * If the filter value is missing value("."), return null.
    * @param variantContext
    * @return Filter set after handling "PASS" and missing value.
    */
@@ -56,9 +58,11 @@ public interface VariantToBqUtils {
 
   /**
    * <p>
-   *  Add variant Info field into BQ table row. For each field in the VCFHeader, check if the
+   *  Add variant Info field into BQ table row. Iterate each field in the VCFHeader, check if the
    *  field is presented. If the field type is `Flag` but not presented, it will set `false` in
-   *  the row field.
+   *  the corresponding row field. And the row field name should match the schema format. If the
+   *  attribute name does not match the schema format, we will get the sanitized field name and
+   *  set the row value in the sanitized field.
    * </p>
    *
    * <p>
@@ -121,13 +125,18 @@ public interface VariantToBqUtils {
   public void addGenotypes(TableRow row, List<Allele> alleles, VariantContext variantContext);
 
   /**
-   * Add all format attribute fields in {@link Genotype}, if there is phase set field(PS), set
-   * phase set. If there is no such phase set field, set default phase set "*".
+   * Add all format attribute fields in {@link Genotype}. Iterate each format field in VCFHeader,
+   * if the field is present and it is not the genotype field, get the value and set in the
+   * corresponding call field. Note that if the field name does not match the schema format, we
+   * will get the sanitized field name and set the row value in the sanitized field.
+   *
+   * if there is phase set field(PS), set phase set. If there is no such phase set field, set
+   * default phase set "*".
    * @param row TableRow for each call(sample).
    * @param genotype Current genotype sample in the VariantContext
    * @param vcfHeader Define the field type and count format.
    */
-  public void addFormatAndPhaseSet(TableRow row, Genotype genotype, VCFHeader vcfHeader);
+  public void addFormat(TableRow row, Genotype genotype, VCFHeader vcfHeader);
 
   /**
    * <p>

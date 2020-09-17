@@ -142,14 +142,14 @@ public class BigQueryRowGeneratorTest {
     assertThat(rowWithMissingHQ.get(Constants.ColumnKeyNames.CALLS_GENOTYPE))
         .isEqualTo(Arrays.asList(TEST_GENOTYPE, TEST_GENOTYPE));
     assertThat(rowWithMissingHQ.get(VCFConstants.HAPLOTYPE_QUALITY_KEY))
-        .isEqualTo(Arrays.asList(null, null));
+        .isEqualTo(Collections.emptyList());
   }
 
   @Test
   public void testBigQueryRowWithEmptyFields_whenCheckingRowElements_thenTrue() {
     // ID field is ".", which should be null in the BQ row.
     assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.NAMES))
-        .isEqualTo(Collections.singletonList(null));
+        .isEqualTo(Collections.emptyList());
 
     // Quality field is ".", which should be -10 in the BQ row.
     assertThat(rowWithEmptyFields.get(Constants.ColumnKeyNames.QUALITY))
