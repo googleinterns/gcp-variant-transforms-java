@@ -38,7 +38,7 @@ public class SchemaGeneratorImplTest {
 
   @Inject public SchemaGeneratorImpl schemaGen;
   @Rule public final GuiceBerryRule guiceBerry = new GuiceBerryRule(TestEnv.class);
-  
+
   @Before
   public void constructMockVCFHeader(){
     mockedVcfHeader = mock(VCFHeader.class);
@@ -270,7 +270,7 @@ public class SchemaGeneratorImplTest {
     ImmutableList<TableFieldSchema> callFields = schemaGen.getCallSubFields(mockedVcfHeader);
     TableFieldSchema callsGenotypeField = callFields
         .get(SchemaUtils.FieldIndex.CALLS_GENOTYPE);
-    
+
     assertThat(callsGenotypeField.getName())
         .isEqualTo(Constants.ColumnKeyNames.CALLS_GENOTYPE);
     assertThat(callsGenotypeField.getDescription())
@@ -305,7 +305,8 @@ public class SchemaGeneratorImplTest {
     VCFInfoHeaderLine sampleInfoHeaderLine = new VCFInfoHeaderLine(name, count,
         infoType, description);
 
-    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(sampleInfoHeaderLine);
+    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(sampleInfoHeaderLine,
+        true);
 
     assertThat(infoField.getName()).isEqualTo(name);
     assertThat(infoField.getDescription()).isEqualTo(description);
@@ -411,22 +412,23 @@ public class SchemaGeneratorImplTest {
     // ID="AF" -- Genotype
     assertThat(alleleFrequency.getName()).isEqualTo(alleleFrequencyName);
     assertThat(alleleFrequency.getDescription()).isEqualTo(alleleFrequencyDescription);
-    assertThat(alleleFrequency.getMode()).isEqualTo(SchemaUtils.BQFieldMode.REPEATED);
+    assertThat(alleleFrequency.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
     assertThat(alleleFrequency.getType()).isEqualTo(SchemaUtils.BQFieldType.FLOAT);
   }
 
   @Test
   public void testConvertCompoundHeaderLineToField_whenFlag_thenIsEqualTo() {
-     String name = "sampleName";
-      String description = "sampleDescription";
-      VCFInfoHeaderLine infoHeaderLine = new VCFInfoHeaderLine(
-          name, 0, VCFHeaderLineType.Flag, description); // Number = 0
-      TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(infoHeaderLine);
+    String name = "sampleName";
+    String description = "sampleDescription";
+    VCFInfoHeaderLine infoHeaderLine = new VCFInfoHeaderLine(
+        name, 0, VCFHeaderLineType.Flag, description); // Number = 0
+    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(infoHeaderLine,
+        true);
 
-      assertThat(infoField.getName()).isEqualTo(name);
-      assertThat(infoField.getDescription()).isEqualTo(description);
-      assertThat(infoField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
-      assertThat(infoField.getType()).isEqualTo(SchemaUtils.BQFieldType.BOOLEAN);
+    assertThat(infoField.getName()).isEqualTo(name);
+    assertThat(infoField.getDescription()).isEqualTo(description);
+    assertThat(infoField.getMode()).isEqualTo(SchemaUtils.BQFieldMode.NULLABLE);
+    assertThat(infoField.getType()).isEqualTo(SchemaUtils.BQFieldType.BOOLEAN);
   }
 
   @Test
@@ -435,7 +437,8 @@ public class SchemaGeneratorImplTest {
     String description = "sampleDescription";
     VCFInfoHeaderLine infoHeaderLine = new VCFInfoHeaderLine(
         name, 2, VCFHeaderLineType.Integer, description); // Number > 1
-    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(infoHeaderLine);
+    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(infoHeaderLine,
+        false);
 
     assertThat(infoField.getName()).isEqualTo(name);
     assertThat(infoField.getDescription()).isEqualTo(description);
@@ -449,7 +452,7 @@ public class SchemaGeneratorImplTest {
     String description = "sampleDescription";
     VCFInfoHeaderLine infoHeaderLine = new VCFInfoHeaderLine(
         name, 1, VCFHeaderLineType.Integer, description); // Number = 1
-    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(infoHeaderLine);
+    TableFieldSchema infoField = schemaGen.convertCompoundHeaderLineToField(infoHeaderLine, false);
 
     assertThat(infoField.getName()).isEqualTo(name);
     assertThat(infoField.getDescription()).isEqualTo(description);
