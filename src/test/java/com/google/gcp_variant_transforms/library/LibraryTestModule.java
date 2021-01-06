@@ -13,5 +13,6 @@ public class LibraryTestModule extends AbstractModule {
     bind(BigQueryRowGenerator.class).to(BigQueryRowGeneratorImpl.class);
     bind(SchemaGenerator.class).to(SchemaGeneratorImpl.class);
     bind(VariantToBqUtils.class).to(VariantToBqUtilsImpl.class);
+    bind(SchemaGenerator.class).to(SchemaGeneratorImpl.class);
   }
 }
